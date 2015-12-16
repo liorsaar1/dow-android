@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/drawer_nav_feed"
+        android:title="@string/drawer_nav_feed"/>
+    <item
+        android:id="@+id/drawer_nav_newsletter"
+        android:title="@string/drawer_nav_newsletter"/>
+    <item
+        android:id="@+id/drawer_nav_patreon"
+        android:title="@string/drawer_nav_patreon"/>
+    <item
+        android:id="@+id/drawer_nav_sofanaut"
+        android:title="@string/drawer_nav_sofanaut"/>
+    <item
+        android:id="@+id/drawer_nav_notifications"
+        android:title="@string/drawer_nav_notifications"/>
+    <item
+        android:id="@+id/drawer_nav_shop"
+        android:title="@string/drawer_nav_shop"/>
+    <item
+        android:id="@+id/drawer_nav_help"
+        android:title="@string/drawer_nav_help"/>
+    <item
+        android:id="@+id/drawer_nav_about"
+        android:title="@string/drawer_nav_about"/>
+</menu>

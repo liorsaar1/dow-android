@@ -1,0 +1,21 @@
+<resources>
+
+    <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorAccent">@color/colorAccent</item>
+        <item name="android:textColorPrimary">@color/colorTextPrimary</item>
+        <item name="android:textColorSecondary">@color/colorTextSecondary</item>
+    </style>
+
+    <!-- tab layout - text color -->
+    <style name="DowTab" parent="TextAppearance.Design.Tab.Lowercase">
+        <item name="android:textColor">@color/colorPrimaryDark</item>
+    </style>
+
+    <!-- tab layout - titles lowercase -->
+    <style name="TextAppearance.Design.Tab.Lowercase">
+        <item name="textAllCaps">false</item>
+    </style>
+
+</resources>
