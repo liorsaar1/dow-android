@@ -2,6 +2,7 @@ package com.districtofwonders.pack;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -14,6 +15,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.android.volley.Request;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.StringRequest;
 import com.districtofwonders.pack.FeedFragment.FeedViewFragment;
 
 import java.util.ArrayList;
@@ -23,6 +28,7 @@ public class FeedFragment extends Fragment {
     private TabLayout mTabLayout;
     private ViewPager mPager;
     private FeedPagerAdapter mAdapter;
+    TextView tv;
 
     public static Fragment newInstance(Context context) {
         FeedFragment feedFragment = new FeedFragment();
@@ -42,7 +48,41 @@ public class FeedFragment extends Fragment {
 
         mPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(mTabLayout));
 
+        tv = (TextView) root.findViewById(R.id.feed_text);
+
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                test();
+            }
+        }, 1000);
+
         return root;
+    }
+
+    private void test() {
+        String url = "http://www.starshipsofa.com/feed/";
+        tv.setText(url);
+
+        // Formulate the request and handle the response.
+        StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        // Do something with the response
+                        tv.setText(response);
+                        return;
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        tv.setText(error.getMessage());
+                        return;
+                        // Handle error
+                    }
+                });
+        DowSingleton.getInstance(getActivity()).addToRequestQueue(stringRequest);
     }
 
     public static class FeedViewFragment extends Fragment {

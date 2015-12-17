@@ -16,6 +16,12 @@
         app:tabMode="scrollable"
         app:tabSelectedTextColor="@color/colorAccent"
         app:tabTextAppearance="@style/DowTab"/>
+    
+    <TextView
+        android:id="@+id/feed_text"
+        android:text="12341234"
+        android:layout_width="match_parent"
+        android:layout_height="200dip"/>
 
     <android.support.v4.view.ViewPager
         android:id="@+id/feed_view_pager"
