@@ -92,7 +92,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     final String[] fragments ={
-            "com.districtofwonders.pack.FeedFragment",
+            "com.districtofwonders.pack.FeedsFragment",
             "com.districtofwonders.pack.FragmentTwo"};
 
     @Override
