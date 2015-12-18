@@ -1,4 +1,4 @@
-package com.districtofwonders.pack;
+package com.districtofwonders.pack.util;
 
 import android.app.Activity;
 import android.app.DatePickerDialog;
@@ -14,6 +14,10 @@ import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -134,6 +138,19 @@ public class ViewUtils {
             TextView textView = (TextView) tabView.getChildAt(0);
             textView.setAllCaps(false);
         }
+    }
+
+    public static String getAssetAsString(Context context, String assetName) throws IOException {
+        InputStream inputStream = context.getAssets().open(assetName);
+        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream, "UTF-8"));
+        StringBuilder stringBuilder = new StringBuilder();
+        String line;
+
+        while ((line = bufferedReader.readLine()) != null) {
+            stringBuilder.append(line);
+        }
+        bufferedReader.close();
+        return stringBuilder.toString();
     }
 
 //    public static void playVideo(Activity activity, Uri uri) {

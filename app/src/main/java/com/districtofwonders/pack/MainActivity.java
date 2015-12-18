@@ -78,16 +78,17 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     private void navigate(int mSelectedId) {
         mDrawerLayout.closeDrawer(GravityCompat.START);
-        int pos = 0;
         if (mSelectedId == R.id.drawer_nav_feed) {
-            pos = 0;
+            setFragment(0);
         }
         if (mSelectedId == R.id.drawer_nav_about) {
-            pos = 1;
+            setFragment(1);
         }
+    }
 
+    private void setFragment(int position) {
         FragmentTransaction tx = getSupportFragmentManager().beginTransaction(); // TODO refactor
-        tx.replace(R.id.main_content, Fragment.instantiate(MainActivity.this, fragments[pos]));
+        tx.replace(R.id.main_content, Fragment.instantiate(MainActivity.this, fragments[position]));
         tx.commit();
     }
 

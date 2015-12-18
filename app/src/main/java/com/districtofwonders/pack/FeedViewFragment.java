@@ -15,17 +15,26 @@ import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
+import com.districtofwonders.pack.util.RssFeedParser;
+import com.districtofwonders.pack.util.ViewUtils;
 
+import org.xmlpull.v1.XmlPullParserException;
+
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Created by liorsaar on 2015-12-16
  */
 public class FeedViewFragment extends Fragment {
     public static final String ARG_PAGE = "ARG_PAGE";
+    private static final String TAG = FeedViewFragment.class.getSimpleName();
     RecyclerView mRecyclerView;
     FeedRecyclerAdapter mFeedRecyclerAdapter;
     private String mUrl;
+    private List<Map<String, String>> mList = new ArrayList<>();
 
     public FeedViewFragment() {
     }
@@ -41,12 +50,12 @@ public class FeedViewFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         Bundle arguments = getArguments();
-        int pageNumber = arguments.getInt(ARG_PAGE);
+        int pageNumber = arguments.getInt(ARG_PAGE); // TODO move to load()
         // feed url
         mUrl = FeedsFragment.feeds[pageNumber].url;
         // ui
         mRecyclerView = new RecyclerView(getActivity());
-        mFeedRecyclerAdapter = new FeedRecyclerAdapter(getActivity());
+        mFeedRecyclerAdapter = new FeedRecyclerAdapter(getActivity(), mList);
         mRecyclerView.setAdapter(mFeedRecyclerAdapter);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         return mRecyclerView;
@@ -59,12 +68,29 @@ public class FeedViewFragment extends Fragment {
     }
 
     private void load(String url) {
+        if (mList.size() != 0) {
+            mFeedRecyclerAdapter.setData(mList);
+            return;
+        }
+
+        if(false) {
+            try {
+                String xmlString = ViewUtils.getAssetAsString(getActivity(), "feed_sss.xml");
+                mList = parse(xmlString);
+                mFeedRecyclerAdapter.setData(mList);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return;
+        }
+
         StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
-                        Log.e("ZZZZZ", response);
-                        mFeedRecyclerAdapter.setData(response);
+                        Log.e(TAG, response.substring(300,600));
+                        mList = parse(response);
+                        mFeedRecyclerAdapter.setData(mList);
                         return;
                     }
                 },
@@ -77,22 +103,32 @@ public class FeedViewFragment extends Fragment {
         DowSingleton.getInstance(getActivity()).addToRequestQueue(stringRequest);
     }
 
+    private List<Map<String, String>> parse(String xmlString) {
+        List<Map<String, String>> list = new ArrayList<>();
+        try {
+            list = RssFeedParser.parse(xmlString);
+        } catch (XmlPullParserException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+
 }
 
 
 class FeedRecyclerAdapter extends RecyclerView.Adapter<FeedRecyclerAdapter.FeedRecyclerViewHolder> {
-    private ArrayList<String> list = new ArrayList<>();
+    private List<Map<String, String>> list = new ArrayList<>();
     private LayoutInflater inflater;
 
-    public FeedRecyclerAdapter(Context context) {
+    public FeedRecyclerAdapter(Context context, List<Map<String, String>> list) {
         inflater = LayoutInflater.from(context);
+        this.list = list;
     }
 
-    public void setData(String xmlString) {
-        list.add("A " );
-        list.add("B " );
-        list.add("C " );
-        list.add("D " );
+    public void setData(List<Map<String, String>> list) {
+        this.list = list;
         notifyDataSetChanged();
     }
 
@@ -105,7 +141,7 @@ class FeedRecyclerAdapter extends RecyclerView.Adapter<FeedRecyclerAdapter.FeedR
 
     @Override
     public void onBindViewHolder(FeedRecyclerViewHolder feedRecyclerViewHolder, int i) {
-        feedRecyclerViewHolder.textView.setText(list.get(i));
+        feedRecyclerViewHolder.textView.setText(list.get(i).get("title"));
     }
 
     @Override
