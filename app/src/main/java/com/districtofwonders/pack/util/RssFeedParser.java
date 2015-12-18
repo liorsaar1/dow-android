@@ -7,6 +7,7 @@ import org.xmlpull.v1.XmlPullParserFactory;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -57,43 +58,29 @@ public class RssFeedParser {
         return items;
     }
 
-    private static String readItemOld(XmlPullParser parser) throws XmlPullParserException, IOException {
-        String result = null;
+    private static Map<String, String> readItem(XmlPullParser parser) throws XmlPullParserException, IOException {
+        Map<String, String> item = new HashMap<>();
         parser.require(XmlPullParser.START_TAG, null, "item");
         while (parser.next() != XmlPullParser.END_TAG) {
             if (parser.getEventType() != XmlPullParser.START_TAG) {
                 continue;
             }
             String name = parser.getName();
-            if (name.equals("title")) {
-                result = readTitle(parser);
+            // keep only the required fields
+            if (isTagRequired(name)) {
+                String text = readText(parser);
+                item.put(name, text);
             } else {
                 skip(parser);
             }
         }
-        return result;
-    }
-
-    private static Map readItem(XmlPullParser parser) throws XmlPullParserException, IOException {
-        Map<String, String> item = new HashMap<String, String>();
-        parser.require(XmlPullParser.START_TAG, null, "item");
-        while (parser.next() != XmlPullParser.END_TAG) {
-            if (parser.getEventType() != XmlPullParser.START_TAG) {
-                continue;
-            }
-            String name = parser.getName();
-            String text = readText(parser);
-            item.put(name, text);
-        }
         return item;
     }
 
-    // Processes title tags in the feed.
-    private static String readTitle(XmlPullParser parser) throws IOException, XmlPullParserException {
-        parser.require(XmlPullParser.START_TAG, null, "title");
-        String title = readText(parser);
-        parser.require(XmlPullParser.END_TAG, null, "title");
-        return title;
+    private static List<String> requiredTags = new ArrayList<>(
+            Arrays.asList("title", "link", "pubDate", "itunes:duration"));
+    private static boolean isTagRequired(String name) {
+        return requiredTags.contains(name);
     }
 
     private static String readText(XmlPullParser parser) throws IOException, XmlPullParserException {
