@@ -4,7 +4,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v4.app.Fragment;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -33,11 +35,10 @@ import java.util.Map;
 public class FeedViewFragment extends Fragment {
     public static final String ARG_PAGE = "ARG_PAGE";
     private static final String TAG = FeedViewFragment.class.getSimpleName();
-    RecyclerView mRecyclerView;
-    FeedRecyclerAdapter mFeedRecyclerAdapter;
+    private FeedRecyclerAdapter mFeedRecyclerAdapter;
+    private SwipeRefreshLayout mSwipeRefreshLayout;
     private String mUrl;
     private List<Map<String, String>> mList = new ArrayList<>();
-    private TextView mLoading;
     private TextView mError;
 
     private FeedRecyclerAdapter.OnClickListener mFeedItemOnClickListener = new FeedRecyclerAdapter.OnClickListener() {
@@ -73,10 +74,19 @@ public class FeedViewFragment extends Fragment {
         mUrl = FeedsFragment.feeds[pageNumber].url;
         // ui
         View root = inflater.inflate(R.layout.feed_view_fragment, container, false);
-        mLoading = (TextView) root.findViewById(R.id.feed_view_loading);
         mError = (TextView) root.findViewById(R.id.feed_view_error);
 
-        mRecyclerView = (RecyclerView) root.findViewById(R.id.feed_view_recycler);
+        mSwipeRefreshLayout = (SwipeRefreshLayout)root.findViewById(R.id.feed_view_swipe);
+        mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                mList.clear();
+                mFeedRecyclerAdapter.notifyDataSetChanged();
+                load(mUrl);
+            }
+        });
+
+        RecyclerView mRecyclerView = (RecyclerView) root.findViewById(R.id.feed_view_recycler);
         mFeedRecyclerAdapter = new FeedRecyclerAdapter(getActivity(), mList, mFeedItemOnClickListener);
         mRecyclerView.setAdapter(mFeedRecyclerAdapter);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
@@ -86,6 +96,12 @@ public class FeedViewFragment extends Fragment {
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                mSwipeRefreshLayout.setRefreshing(true);
+            }
+        }, 100);
         load(mUrl);
     }
 
@@ -96,7 +112,6 @@ public class FeedViewFragment extends Fragment {
         }
 
         // setup ui
-        mLoading.setVisibility(View.VISIBLE);
         mError.setVisibility(View.GONE);
 
         if (false) {
@@ -140,18 +155,16 @@ public class FeedViewFragment extends Fragment {
         if (!MainActivity.DEBUG) {
             message = "Server Error";
         }
-        mLoading.setVisibility(View.GONE);
         mError.setVisibility(View.VISIBLE);
         mError.setText(message);
     }
 
     private void setData(String xmlString) throws IOException, XmlPullParserException {
-        mLoading.setVisibility(View.GONE);
         mList = RssFeedParser.parse(xmlString);
         mFeedRecyclerAdapter.setData(mList);
+        mSwipeRefreshLayout.setRefreshing(false);
     }
 }
-
 
 class FeedRecyclerAdapter extends RecyclerView.Adapter<FeedRecyclerAdapter.FeedRecyclerViewHolder> {
     private static final String TAG = FeedRecyclerAdapter.class.getSimpleName();
