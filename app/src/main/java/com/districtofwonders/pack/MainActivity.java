@@ -23,6 +23,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     private static final String SELECTED_ITEM_ID = "selected_item_id";
     private static final String FIRST_TIME = "first_time";
+    public static final boolean DEBUG = true; ;
     private Toolbar mToolbar;
     private NavigationView mDrawer;
     private DrawerLayout mDrawerLayout;

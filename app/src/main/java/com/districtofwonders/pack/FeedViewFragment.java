@@ -20,6 +20,8 @@ import com.android.volley.toolbox.StringRequest;
 import com.districtofwonders.pack.util.RssFeedParser;
 import com.districtofwonders.pack.util.ViewUtils;
 
+import org.xmlpull.v1.XmlPullParserException;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -35,6 +37,22 @@ public class FeedViewFragment extends Fragment {
     FeedRecyclerAdapter mFeedRecyclerAdapter;
     private String mUrl;
     private List<Map<String, String>> mList = new ArrayList<>();
+    private TextView mLoading;
+    private TextView mError;
+
+    private FeedRecyclerAdapter.OnClickListener mFeedItemOnClickListener = new FeedRecyclerAdapter.OnClickListener() {
+        @Override
+        public void onClickLink(int position) {
+            String link = mList.get(position).get("link");
+            Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(link));
+            startActivity(browserIntent);
+        }
+
+        @Override
+        public void onClickPlay(int position) {
+
+        }
+    };
 
     public FeedViewFragment() {
     }
@@ -54,26 +72,16 @@ public class FeedViewFragment extends Fragment {
         // feed url
         mUrl = FeedsFragment.feeds[pageNumber].url;
         // ui
-        mRecyclerView = new RecyclerView(getActivity());
+        View root = inflater.inflate(R.layout.feed_view_fragment, container, false);
+        mLoading = (TextView) root.findViewById(R.id.feed_view_loading);
+        mError = (TextView) root.findViewById(R.id.feed_view_error);
+
+        mRecyclerView = (RecyclerView) root.findViewById(R.id.feed_view_recycler);
         mFeedRecyclerAdapter = new FeedRecyclerAdapter(getActivity(), mList, mFeedItemOnClickListener);
         mRecyclerView.setAdapter(mFeedRecyclerAdapter);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
-        return mRecyclerView;
+        return root;
     }
-
-    private FeedRecyclerAdapter.OnClickListener mFeedItemOnClickListener = new FeedRecyclerAdapter.OnClickListener() {
-        @Override
-        public void onClickLink(int position) {
-            String link = mList.get(position).get("link");
-            Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(link));
-            startActivity(browserIntent);
-        }
-
-        @Override
-        public void onClickPlay(int position) {
-
-        }
-    };
 
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
@@ -87,13 +95,16 @@ public class FeedViewFragment extends Fragment {
             return;
         }
 
-        if(false) {
+        // setup ui
+        mLoading.setVisibility(View.VISIBLE);
+        mError.setVisibility(View.GONE);
+
+        if (false) {
             try {
                 String xmlString = ViewUtils.getAssetAsString(getActivity(), "feed_sss.xml");
-                mList = parse(xmlString);
-                mFeedRecyclerAdapter.setData(mList);
-            } catch (IOException e) {
-                e.printStackTrace();
+                setData(xmlString);
+            } catch (Exception e) {
+                setError(e.getMessage());
             }
             return;
         }
@@ -102,29 +113,43 @@ public class FeedViewFragment extends Fragment {
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
-                        Log.e(TAG, response.substring(300,600));  // DEBUG
-                        mList = parse(response);
-                        mFeedRecyclerAdapter.setData(mList);
+                        Log.e(TAG, response.substring(300, 600));  // DEBUG
+                        try {
+                            setData(response);
+                        } catch (Exception e) {
+                            setError(e.getMessage());
+                        }
                     }
                 },
                 new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) { // TODO error
+                        setError(error);
                     }
                 });
         DowSingleton.getInstance(getActivity()).addToRequestQueue(stringRequest);
     }
 
-    private List<Map<String, String>> parse(String xmlString) {
-        List<Map<String, String>> list = new ArrayList<>();
-        try {
-            list = RssFeedParser.parse(xmlString);
-        } catch (Exception e) { // TODO error handling
-            e.printStackTrace();
-        }
-        return list;
+    private void setError(VolleyError error) {
+        String message = "Server Error " + error.networkResponse.statusCode;
+        setError(message);
     }
 
+    private void setError(String message) {
+        // in production - do not show detailed error
+        if (!MainActivity.DEBUG) {
+            message = "Server Error";
+        }
+        mLoading.setVisibility(View.GONE);
+        mError.setVisibility(View.VISIBLE);
+        mError.setText(message);
+    }
+
+    private void setData(String xmlString) throws IOException, XmlPullParserException {
+        mLoading.setVisibility(View.GONE);
+        mList = RssFeedParser.parse(xmlString);
+        mFeedRecyclerAdapter.setData(mList);
+    }
 }
 
 
@@ -133,11 +158,6 @@ class FeedRecyclerAdapter extends RecyclerView.Adapter<FeedRecyclerAdapter.FeedR
     private final OnClickListener listener;
     private List<Map<String, String>> list = new ArrayList<>();
     private LayoutInflater inflater;
-
-    public interface OnClickListener {
-        void onClickLink(int position);
-        void onClickPlay(int position);
-    }
 
     public FeedRecyclerAdapter(Context context, List<Map<String, String>> list, OnClickListener listener) {
         inflater = LayoutInflater.from(context);
@@ -170,6 +190,12 @@ class FeedRecyclerAdapter extends RecyclerView.Adapter<FeedRecyclerAdapter.FeedR
     @Override
     public int getItemCount() {
         return list.size();
+    }
+
+    public interface OnClickListener {
+        void onClickLink(int position);
+
+        void onClickPlay(int position);
     }
 
     static class FeedRecyclerViewHolder extends RecyclerView.ViewHolder {
