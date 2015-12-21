@@ -5,23 +5,43 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-    <TextView
-        android:id="@+id/feed_item_title"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:orientation="horizontal"
         android:paddingBottom="4dp"
         android:paddingLeft="16dp"
         android:paddingRight="16dp"
-        android:paddingTop="4dp"
-        android:text="Superhero"
-        android:textColor="@color/colorTextSecondary">
-    </TextView>
+        android:paddingTop="4dp">
+
+        <TextView
+            android:id="@+id/feed_item_date"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="8dp"
+            android:gravity="center"
+            android:text="Dec"
+            android:textColor="@color/colorTextSecondary">
+        </TextView>
+
+        <TextView
+            android:id="@+id/feed_item_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="8dp"
+            android:text="feed item title"
+            android:maxLines="2"
+            android:ellipsize="end"
+            android:textColor="@color/colorTextSecondary">
+        </TextView>
+
+    </LinearLayout>
 
     <View
         android:layout_width="match_parent"
         android:layout_height="1dip"
-        android:layout_marginRight="4dip"
         android:layout_marginLeft="4dip"
+        android:layout_marginRight="4dip"
         android:background="@color/colorTextSecondary"/>
 </LinearLayout>
 

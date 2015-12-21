@@ -22,12 +22,14 @@ import com.android.volley.toolbox.StringRequest;
 import com.districtofwonders.pack.DowSingleton;
 import com.districtofwonders.pack.MainActivity;
 import com.districtofwonders.pack.R;
+import com.districtofwonders.pack.util.DateUtils;
 import com.districtofwonders.pack.util.ViewUtils;
 
 import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 import java.util.Map;
 
@@ -35,11 +37,11 @@ import java.util.Map;
  * Created by liorsaar on 2015-12-16
  */
 public class FeedViewFragment extends Fragment {
-    public static final String ARG_PAGE = "ARG_PAGE";
+    public static final String ARG_PAGE_NUMBER = "ARG_PAGE_NUMBER";
     private static final String TAG = FeedViewFragment.class.getSimpleName();
     private FeedRecyclerAdapter mFeedRecyclerAdapter;
     private SwipeRefreshLayout mSwipeRefreshLayout;
-    private String mUrl;
+    private int mPageNumber;
     private List<Map<String, String>> mList = new ArrayList<>();
     private TextView mError;
 
@@ -63,7 +65,7 @@ public class FeedViewFragment extends Fragment {
     public static FeedViewFragment newInstance(int pageNumber) {
         FeedViewFragment feedViewFragment = new FeedViewFragment();
         Bundle arguments = new Bundle();
-        arguments.putInt(ARG_PAGE, pageNumber);
+        arguments.putInt(ARG_PAGE_NUMBER, pageNumber);
         feedViewFragment.setArguments(arguments);
         return feedViewFragment;
     }
@@ -71,9 +73,7 @@ public class FeedViewFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         Bundle arguments = getArguments();
-        int pageNumber = arguments.getInt(ARG_PAGE); // TODO move to load()
-        // feed url
-        mUrl = FeedsFragment.feeds[pageNumber].url;
+        mPageNumber = arguments.getInt(ARG_PAGE_NUMBER);
         // ui
         View root = inflater.inflate(R.layout.feed_view_fragment, container, false);
         mError = (TextView) root.findViewById(R.id.feed_view_error);
@@ -84,12 +84,12 @@ public class FeedViewFragment extends Fragment {
             public void onRefresh() {
                 mList.clear();
                 mFeedRecyclerAdapter.notifyDataSetChanged();
-                load(mUrl);
+                load();
             }
         });
 
         RecyclerView mRecyclerView = (RecyclerView) root.findViewById(R.id.feed_view_recycler);
-        mFeedRecyclerAdapter = new FeedRecyclerAdapter(getActivity(), mList, mFeedItemOnClickListener);
+        mFeedRecyclerAdapter = new FeedRecyclerAdapter(getActivity(), mList, mPageNumber, mFeedItemOnClickListener);
         mRecyclerView.setAdapter(mFeedRecyclerAdapter);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         return root;
@@ -98,23 +98,25 @@ public class FeedViewFragment extends Fragment {
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        load();
+    }
+
+    private void load() {
+        mError.setVisibility(View.GONE);
+        if (mList.size() != 0) {
+            mFeedRecyclerAdapter.setData(mList);
+            return;
+        }
+        // get the feed url
+        String url = FeedsFragment.feeds[mPageNumber].url;
+
+        // setup ui
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
                 mSwipeRefreshLayout.setRefreshing(true);
             }
         }, 100);
-        load(mUrl);
-    }
-
-    private void load(String url) {
-        if (mList.size() != 0) {
-            mFeedRecyclerAdapter.setData(mList);
-            return;
-        }
-
-        // setup ui
-        mError.setVisibility(View.GONE);
 
         if (false) {
             try {
@@ -130,18 +132,17 @@ public class FeedViewFragment extends Fragment {
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
-                        Log.e(TAG, response.substring(300, 600));  // DEBUG
                         try {
                             setData(response);
                         } catch (Exception e) {
-                            setError(e.getMessage());
+                            setError(e.getMessage()); // parse error
                         }
                     }
                 },
                 new Response.ErrorListener() {
                     @Override
-                    public void onErrorResponse(VolleyError error) { // TODO error
-                        setError(error);
+                    public void onErrorResponse(VolleyError error) {
+                        setError(error); // network error
                     }
                 });
         DowSingleton.getInstance(getActivity()).addToRequestQueue(stringRequest);
@@ -162,6 +163,9 @@ public class FeedViewFragment extends Fragment {
     }
 
     private void setData(String xmlString) throws IOException, XmlPullParserException {
+        if (MainActivity.DEBUG)
+            Log.e(TAG, xmlString.substring(300, 600));
+
         mList = RssFeedParser.parse(xmlString);
         mFeedRecyclerAdapter.setData(mList);
         mSwipeRefreshLayout.setRefreshing(false);
@@ -171,12 +175,14 @@ public class FeedViewFragment extends Fragment {
 class FeedRecyclerAdapter extends RecyclerView.Adapter<FeedRecyclerAdapter.FeedRecyclerViewHolder> {
     private static final String TAG = FeedRecyclerAdapter.class.getSimpleName();
     private final OnClickListener listener;
+    private final int pageNumber;
     private List<Map<String, String>> list = new ArrayList<>();
     private LayoutInflater inflater;
 
-    public FeedRecyclerAdapter(Context context, List<Map<String, String>> list, OnClickListener listener) {
+    public FeedRecyclerAdapter(Context context, List<Map<String, String>> list, int pageNumber, OnClickListener listener) {
         inflater = LayoutInflater.from(context);
         this.list = list;
+        this.pageNumber = pageNumber;
         this.listener = listener;
     }
 
@@ -193,13 +199,31 @@ class FeedRecyclerAdapter extends RecyclerView.Adapter<FeedRecyclerAdapter.FeedR
 
     @Override
     public void onBindViewHolder(FeedRecyclerViewHolder feedRecyclerViewHolder, final int position) {
-        feedRecyclerViewHolder.title.setText(list.get(position).get("title"));
+        feedRecyclerViewHolder.date.setText(getPubDate(position));
+        feedRecyclerViewHolder.title.setText(getTitle(position));
         feedRecyclerViewHolder.title.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 listener.onClickLink(position);
             }
         });
+    }
+
+    private String getTitle(int position) {
+        String title = list.get(position).get("title");
+        String feedTitle = FeedsFragment.feeds[pageNumber].title;
+        if (title.toLowerCase().startsWith(feedTitle.toLowerCase())) {
+            title = title.substring(feedTitle.length()+1);
+        }
+        return title;
+    }
+
+    private String getPubDate(int position) {
+        String pubDateString = list.get(position).get("pubDate");
+        Calendar cal = DateUtils.getPubDateCal(pubDateString);
+        String month = DateUtils.getMonthString(cal);
+        String day = DateUtils.getDayString(cal);
+        return month +"\n" + day;
     }
 
     @Override
@@ -215,10 +239,12 @@ class FeedRecyclerAdapter extends RecyclerView.Adapter<FeedRecyclerAdapter.FeedR
 
     static class FeedRecyclerViewHolder extends RecyclerView.ViewHolder {
 
+        TextView date;
         TextView title;
 
         public FeedRecyclerViewHolder(View itemView) {
             super(itemView);
+            date = (TextView) itemView.findViewById(R.id.feed_item_date);
             title = (TextView) itemView.findViewById(R.id.feed_item_title);
         }
     }
