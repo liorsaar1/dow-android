@@ -34,7 +34,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.main_activity);
         mToolbar = (Toolbar) findViewById(R.id.app_bar);
         setSupportActionBar(mToolbar);
         mDrawer = (NavigationView) findViewById(R.id.main_drawer);
@@ -94,8 +94,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     final String[] fragments ={
-            "com.districtofwonders.pack.FeedsFragment",
-            "com.districtofwonders.pack.FragmentTwo"};
+            "com.districtofwonders.pack.fragment.feed.FeedsFragment",
+            "com.districtofwonders.pack.fragment.AboutFragment"};
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

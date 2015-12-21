@@ -1,4 +1,4 @@
-package com.districtofwonders.pack;
+package com.districtofwonders.pack.fragment.feed;
 
 import android.content.Context;
 import android.content.Intent;
@@ -19,7 +19,9 @@ import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
-import com.districtofwonders.pack.util.RssFeedParser;
+import com.districtofwonders.pack.DowSingleton;
+import com.districtofwonders.pack.MainActivity;
+import com.districtofwonders.pack.R;
 import com.districtofwonders.pack.util.ViewUtils;
 
 import org.xmlpull.v1.XmlPullParserException;

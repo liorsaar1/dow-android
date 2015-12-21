@@ -1,4 +1,4 @@
-package com.districtofwonders.pack;
+package com.districtofwonders.pack.fragment.feed;
 
 import android.content.Context;
 import android.os.Bundle;
@@ -10,6 +10,8 @@ import android.support.v4.view.ViewPager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+
+import com.districtofwonders.pack.R;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -1,4 +1,4 @@
-package com.districtofwonders.pack.util;
+package com.districtofwonders.pack.fragment.feed;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
