@@ -9,16 +9,19 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
+        android:gravity="center_vertical"
         android:paddingBottom="4dp"
-        android:paddingLeft="16dp"
-        android:paddingRight="16dp"
-        android:paddingTop="4dp">
+        android:paddingLeft="4dp"
+        android:paddingRight="4dp"
+        android:paddingTop="4dp"
+        android:weightSum="1">
 
         <TextView
             android:id="@+id/feed_item_date"
-            android:layout_width="wrap_content"
+            android:layout_width="0dip"
             android:layout_height="wrap_content"
             android:layout_marginRight="8dp"
+            android:layout_weight="0.1"
             android:gravity="center"
             android:text="Dec"
             android:textColor="@color/colorTextSecondary">
@@ -26,14 +29,32 @@
 
         <TextView
             android:id="@+id/feed_item_title"
-            android:layout_width="match_parent"
+            android:layout_width="0dip"
             android:layout_height="wrap_content"
             android:layout_marginRight="8dp"
-            android:text="feed item title"
-            android:maxLines="2"
+            android:layout_weight="0.7"
             android:ellipsize="end"
+            android:maxLines="2"
+            android:text="feed item title"
             android:textColor="@color/colorTextSecondary">
         </TextView>
+
+        <com.districtofwonders.pack.widgets.FontAwesomeTextView
+            android:id="@+id/feed_item_play"
+            android:layout_width="0dip"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.1"
+            android:text="play-circle-o"
+            android:layout_marginRight="10dip"
+            android:textSize="30sp"/>
+
+        <com.districtofwonders.pack.widgets.FontAwesomeTextView
+            android:id="@+id/feed_item_download"
+            android:layout_width="0dip"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.1"
+            android:text="fa-download"
+            android:textSize="24sp"/>
 
     </LinearLayout>
 
