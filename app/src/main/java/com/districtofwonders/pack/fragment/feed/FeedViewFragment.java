@@ -25,6 +25,7 @@ import com.districtofwonders.pack.R;
 import com.districtofwonders.pack.util.DateUtils;
 import com.districtofwonders.pack.util.ViewUtils;
 
+import org.xml.sax.SAXException;
 import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
@@ -32,6 +33,8 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Map;
+
+import javax.xml.parsers.ParserConfigurationException;
 
 /**
  * Created by liorsaar on 2015-12-16
@@ -55,16 +58,14 @@ public class FeedViewFragment extends Fragment {
 
         @Override
         public void onClickPlay(int position) {
-            String link = mList.get(position).get("link");
+            String link = mList.get(position).get("enclosure.url");
             Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(link));
             startActivity(browserIntent);
         }
 
         @Override
         public void onClickDownload(int position) {
-            String link = mList.get(position).get("link");
-            Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(link));
-            startActivity(browserIntent);
+
         }
     };
 
@@ -170,11 +171,12 @@ public class FeedViewFragment extends Fragment {
         mError.setText(message);
     }
 
-    private void setData(String xmlString) throws IOException, XmlPullParserException {
+    private void setData(String xmlString) throws IOException, XmlPullParserException, ParserConfigurationException, SAXException {
         if (MainActivity.DEBUG)
             Log.e(TAG, xmlString.substring(300, 600));
 
-        mList = RssFeedParser.parse(xmlString);
+        FeedDomParser parser = new FeedDomParser(xmlString);
+        mList = parser.getItems();
         mFeedRecyclerAdapter.setData(mList);
         mSwipeRefreshLayout.setRefreshing(false);
     }
