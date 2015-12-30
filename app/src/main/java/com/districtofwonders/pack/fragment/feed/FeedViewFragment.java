@@ -116,6 +116,17 @@ public class FeedViewFragment extends Fragment {
             mFeedRecyclerAdapter.setData(mList);
             return;
         }
+        // DEBUG - read an xml
+        if (false) {
+            try {
+                String xmlString = ViewUtils.getAssetAsString(getActivity(), "feed/feed_sss.xml");
+                setData(xmlString);
+            } catch (Exception e) {
+                setError(e.getMessage());
+            }
+            return;
+        }
+
         // get the feed url
         String url = FeedsFragment.feeds[mPageNumber].url;
 
@@ -126,16 +137,6 @@ public class FeedViewFragment extends Fragment {
                 mSwipeRefreshLayout.setRefreshing(true);
             }
         }, 100);
-
-        if (false) {
-            try {
-                String xmlString = ViewUtils.getAssetAsString(getActivity(), "feed/feed_sss.xml");
-                setData(xmlString);
-            } catch (Exception e) {
-                setError(e.getMessage());
-            }
-            return;
-        }
 
         StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
                 new Response.Listener<String>() {
@@ -175,7 +176,7 @@ public class FeedViewFragment extends Fragment {
         if (MainActivity.DEBUG)
             Log.e(TAG, xmlString.substring(300, 600));
 
-        FeedDomParser parser = new FeedDomParser(xmlString);
+        FeedParser parser = new FeedParser(xmlString);
         mList = parser.getItems();
         mFeedRecyclerAdapter.setData(mList);
         mSwipeRefreshLayout.setRefreshing(false);
@@ -216,6 +217,10 @@ class FeedRecyclerAdapter extends RecyclerView.Adapter<FeedRecyclerAdapter.FeedR
     public void onBindViewHolder(FeedRecyclerViewHolder feedRecyclerViewHolder, final int position) {
         feedRecyclerViewHolder.date.setText(getPubDate(position));
         feedRecyclerViewHolder.title.setText(getTitle(position));
+        String duration = getDuration(position);
+        feedRecyclerViewHolder.duration.setText(duration);
+        int durationVisibility = duration == null ? View.GONE : View.VISIBLE;
+        feedRecyclerViewHolder.duration.setVisibility(durationVisibility);
         feedRecyclerViewHolder.title.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -237,7 +242,7 @@ class FeedRecyclerAdapter extends RecyclerView.Adapter<FeedRecyclerAdapter.FeedR
     }
 
     private String getTitle(int position) {
-        String title = list.get(position).get("title");
+        String title = list.get(position).get(FeedParser.Tags.TITLE);
         String feedTitle = FeedsFragment.feeds[pageNumber].title;
         if (title.toLowerCase().startsWith(feedTitle.toLowerCase())) {
             title = title.substring(feedTitle.length()+1);
@@ -246,11 +251,20 @@ class FeedRecyclerAdapter extends RecyclerView.Adapter<FeedRecyclerAdapter.FeedR
     }
 
     private String getPubDate(int position) {
-        String pubDateString = list.get(position).get("pubDate");
+        String pubDateString = list.get(position).get(FeedParser.Tags.PUB_DATE);
         Calendar cal = DateUtils.getPubDateCal(pubDateString);
         String month = DateUtils.getMonthString(cal);
         String day = DateUtils.getDayString(cal);
         return month +"\n" + day;
+    }
+
+    private String getDuration(int position) {
+        String durationString = list.get(position).get(FeedParser.Tags.DURATION);
+        if (durationString == null) {
+            return null;
+        }
+        int minutes = DateUtils.getMinutes(durationString);
+        return minutes + " min";
     }
 
     @Override
@@ -266,14 +280,16 @@ class FeedRecyclerAdapter extends RecyclerView.Adapter<FeedRecyclerAdapter.FeedR
 
     static class FeedRecyclerViewHolder extends RecyclerView.ViewHolder {
 
-        TextView date, title, play, download;
+        TextView date, title, download, duration;
+        View play;
 
         public FeedRecyclerViewHolder(View itemView) {
             super(itemView);
             date = (TextView) itemView.findViewById(R.id.feed_item_date);
             title = (TextView) itemView.findViewById(R.id.feed_item_title);
-            play = (TextView) itemView.findViewById(R.id.feed_item_play);
+            play = itemView.findViewById(R.id.feed_item_play);
             download = (TextView) itemView.findViewById(R.id.feed_item_download);
+            duration = (TextView) itemView.findViewById(R.id.feed_item_duration);
         }
     }
 }

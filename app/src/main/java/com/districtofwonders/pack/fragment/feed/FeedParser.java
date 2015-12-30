@@ -1,13 +1,12 @@
 package com.districtofwonders.pack.fragment.feed;
 
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
+import com.districtofwonders.pack.util.DomParser;
+
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -15,37 +14,24 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
 /**
  * Created by liorsaar on 2015-12-17
  */
-public class FeedDomParser {
-    enum FeedTags { item };
+public class FeedParser extends DomParser {
 
     private static List<String> requiredTags = new ArrayList<>(
-            Arrays.asList("title", "link", "pubDate", "itunes:duration"));
+            Arrays.asList(Tags.TITLE, Tags.LINK, Tags.PUB_DATE, Tags.DURATION));
 
-
-    Document document;
-    Element root;
-
-    public FeedDomParser(String xmlString) throws ParserConfigurationException, IOException, SAXException {
-        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-        DocumentBuilder builder = factory.newDocumentBuilder();
-
-        ByteArrayInputStream input =  new ByteArrayInputStream(xmlString.getBytes("UTF-8"));
-        document = builder.parse(input);
-        root = document.getDocumentElement();
+    public FeedParser(String xmlString) throws ParserConfigurationException, IOException, SAXException {
+        super(xmlString);
     }
 
     public List<Map<String, String>> getItems() {
         List<Map<String, String>> itemsList = new ArrayList<>();
 
-        String x = String.valueOf(FeedTags.item);
-        NodeList itemsNodeList = root.getElementsByTagName("item");
+        NodeList itemsNodeList = getRoot().getElementsByTagName(Elements.ITEM);
         for (int i = 0; i < itemsNodeList.getLength(); i++) {
             Node itemNode = itemsNodeList.item(i);
             Map<String, String> itemMap = getItem(itemNode);
@@ -62,12 +48,29 @@ public class FeedDomParser {
             if (requiredTags.contains(node.getNodeName())) {
                 map.put(node.getNodeName(), node.getTextContent());
             }
-            if (node.getNodeName().equals("enclosure")) {
+            if (node.getNodeName().equals(Elements.ENCLOSURE)) {
                 NamedNodeMap urlNNP = node.getAttributes();
-                String url = urlNNP.getNamedItem("url").getNodeValue();
-                map.put( "enclosure.url", url);
+                String url = urlNNP.getNamedItem(Tags.URL).getNodeValue();
+                map.put(Keys.ENCLOSURE_URL, url);
             }
         }
         return map;
+    }
+
+    class Elements {
+        public static final String ITEM = "item";
+        public static final String ENCLOSURE = "enclosure";
+    }
+
+    class Tags {
+        public static final String TITLE = "title";
+        public static final String LINK = "link";
+        public static final String PUB_DATE = "pubDate";
+        public static final String DURATION = "itunes:duration";
+        public static final String URL = "url";
+    }
+
+    class Keys {
+        public static final String ENCLOSURE_URL = "enclosure.url";
     }
 }

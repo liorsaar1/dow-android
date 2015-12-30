@@ -30,4 +30,12 @@ public class DateUtils {
         return new SimpleDateFormat("dd").format(calendar.getTime());
     }
 
+    public static int getMinutes(String durationString) {
+        String[] parts = durationString.split(":");
+        try {
+            return Integer.parseInt(parts[0]) * 60 + Integer.parseInt(parts[1]);
+        } catch (Throwable t) {
+            throw new IllegalArgumentException("Illegal duration format" + durationString);
+        }
+    }
 }
