@@ -25,6 +25,7 @@ import com.districtofwonders.pack.R;
 import com.districtofwonders.pack.util.DateUtils;
 import com.districtofwonders.pack.util.ViewUtils;
 
+import org.xml.sax.SAXException;
 import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
@@ -32,6 +33,8 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Map;
+
+import javax.xml.parsers.ParserConfigurationException;
 
 /**
  * Created by liorsaar on 2015-12-16
@@ -55,6 +58,13 @@ public class FeedViewFragment extends Fragment {
 
         @Override
         public void onClickPlay(int position) {
+            String link = mList.get(position).get("enclosure.url");
+            Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(link));
+            startActivity(browserIntent);
+        }
+
+        @Override
+        public void onClickDownload(int position) {
 
         }
     };
@@ -82,8 +92,7 @@ public class FeedViewFragment extends Fragment {
         mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                mList.clear();
-                mFeedRecyclerAdapter.notifyDataSetChanged();
+                clearData();
                 load();
             }
         });
@@ -120,7 +129,7 @@ public class FeedViewFragment extends Fragment {
 
         if (false) {
             try {
-                String xmlString = ViewUtils.getAssetAsString(getActivity(), "feed_sss.xml");
+                String xmlString = ViewUtils.getAssetAsString(getActivity(), "feed/feed_sss.xml");
                 setData(xmlString);
             } catch (Exception e) {
                 setError(e.getMessage());
@@ -162,13 +171,19 @@ public class FeedViewFragment extends Fragment {
         mError.setText(message);
     }
 
-    private void setData(String xmlString) throws IOException, XmlPullParserException {
+    private void setData(String xmlString) throws IOException, XmlPullParserException, ParserConfigurationException, SAXException {
         if (MainActivity.DEBUG)
             Log.e(TAG, xmlString.substring(300, 600));
 
-        mList = RssFeedParser.parse(xmlString);
+        FeedDomParser parser = new FeedDomParser(xmlString);
+        mList = parser.getItems();
         mFeedRecyclerAdapter.setData(mList);
         mSwipeRefreshLayout.setRefreshing(false);
+    }
+
+    private void clearData() {
+        mList.clear();
+        mFeedRecyclerAdapter.setData(mList);
     }
 }
 
@@ -207,6 +222,18 @@ class FeedRecyclerAdapter extends RecyclerView.Adapter<FeedRecyclerAdapter.FeedR
                 listener.onClickLink(position);
             }
         });
+        feedRecyclerViewHolder.play.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                listener.onClickPlay(position);
+            }
+        });
+        feedRecyclerViewHolder.download.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                listener.onClickDownload(position);
+            }
+        });
     }
 
     private String getTitle(int position) {
@@ -233,19 +260,20 @@ class FeedRecyclerAdapter extends RecyclerView.Adapter<FeedRecyclerAdapter.FeedR
 
     public interface OnClickListener {
         void onClickLink(int position);
-
         void onClickPlay(int position);
+        void onClickDownload(int position);
     }
 
     static class FeedRecyclerViewHolder extends RecyclerView.ViewHolder {
 
-        TextView date;
-        TextView title;
+        TextView date, title, play, download;
 
         public FeedRecyclerViewHolder(View itemView) {
             super(itemView);
             date = (TextView) itemView.findViewById(R.id.feed_item_date);
             title = (TextView) itemView.findViewById(R.id.feed_item_title);
+            play = (TextView) itemView.findViewById(R.id.feed_item_play);
+            download = (TextView) itemView.findViewById(R.id.feed_item_download);
         }
     }
 }
