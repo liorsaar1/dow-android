@@ -74,6 +74,7 @@ public class RegistrationIntentService extends IntentService {
             // on a third-party server, this ensures that we'll attempt the update at a later time.
             sharedPreferences.edit().putBoolean(GcmPreferences.SENT_TOKEN_TO_SERVER, false).apply();
             sharedPreferences.edit().putString(GcmPreferences.TOKEN, null).apply();
+            sharedPreferences.edit().putString(GcmPreferences.REGISTRATION_ERROR, e.getMessage()).apply();
         }
         // Notify UI that registration has completed, so the progress indicator can be hidden.
         Intent registrationComplete = new Intent(GcmPreferences.REGISTRATION_COMPLETE);
