@@ -21,17 +21,23 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.View;
+import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.districtofwonders.pack.R;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
+
+import java.io.IOException;
 
 public class GcmActivity extends AppCompatActivity {
 
@@ -41,6 +47,7 @@ public class GcmActivity extends AppCompatActivity {
     private BroadcastReceiver mRegistrationBroadcastReceiver;
     private ProgressBar mRegistrationProgressBar;
     private TextView mInformationTextView;
+    private Button mSub, mUnsub;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,18 +59,74 @@ public class GcmActivity extends AppCompatActivity {
             @Override
             public void onReceive(Context context, Intent intent) {
                 mRegistrationProgressBar.setVisibility(ProgressBar.GONE);
-                SharedPreferences sharedPreferences =
-                        PreferenceManager.getDefaultSharedPreferences(context);
-                boolean sentToken = sharedPreferences
-                        .getBoolean(GcmPreferences.SENT_TOKEN_TO_SERVER, false);
+                SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+                boolean sentToken = sharedPreferences.getBoolean(GcmPreferences.SENT_TOKEN_TO_SERVER, false);
+                final String token = sharedPreferences.getString(GcmPreferences.TOKEN, null);
                 if (sentToken) {
                     mInformationTextView.setText(getString(R.string.gcm_send_message));
+                    mSub.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            new AsyncTask<Object, Void, Exception>() {
+                                @Override
+                                protected Exception doInBackground(Object... params) {
+                                    String token = (String) params[0];
+                                    String[] topics = (String[]) params[1];
+                                    try {
+                                        RegistrationIntentService.subscribeTopics(GcmActivity.this, token, topics);
+                                    } catch (IOException e) {
+                                        return e;
+                                    }
+                                    return null;
+                                }
+
+                                @Override
+                                protected void onPostExecute(Exception exception) {
+                                    if (exception != null) {
+                                        Toast.makeText(GcmActivity.this, "ERROR:"+ exception.getMessage(), Toast.LENGTH_LONG).show();
+                                        return;
+                                    }
+                                    Toast.makeText(GcmActivity.this, "Subscribed", Toast.LENGTH_LONG).show();
+                                }
+                            }.execute(token, new String[]{"feed"});
+
+                        }
+                    });
+                    mUnsub.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            new AsyncTask<Object, Void, Exception>() {
+                                @Override
+                                protected Exception doInBackground(Object... params) {
+                                    String token = (String) params[0];
+                                    String[] topics = (String[]) params[1];
+                                    try {
+                                        RegistrationIntentService.unsubscribeTopics(GcmActivity.this, token, topics);
+                                    } catch (IOException e) {
+                                        return e;
+                                    }
+                                    return null;
+                                }
+
+                                @Override
+                                protected void onPostExecute(Exception exception) {
+                                    if (exception != null) {
+                                        Toast.makeText(GcmActivity.this, "ERROR:"+ exception.getMessage(), Toast.LENGTH_LONG).show();
+                                        return;
+                                    }
+                                    Toast.makeText(GcmActivity.this, "Unsubscribed", Toast.LENGTH_LONG).show();
+                                }
+                            }.execute(token, new String[]{"feed"});
+                        }
+                    });
                 } else {
                     mInformationTextView.setText(getString(R.string.gcm_token_error_message));
                 }
             }
         };
         mInformationTextView = (TextView) findViewById(R.id.informationTextView);
+        mSub = (Button)findViewById(R.id.gcmSubscribe);
+        mUnsub = (Button)findViewById(R.id.gcmUnsubscribe);
 
         if (checkPlayServices()) {
             // Start IntentService to register this application with GCM.

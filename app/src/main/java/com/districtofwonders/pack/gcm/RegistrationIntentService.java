@@ -17,16 +17,17 @@
 package com.districtofwonders.pack.gcm;
 
 import android.app.IntentService;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
+import com.districtofwonders.pack.R;
 import com.google.android.gms.gcm.GcmPubSub;
 import com.google.android.gms.gcm.GoogleCloudMessaging;
 import com.google.android.gms.iid.InstanceID;
-import com.districtofwonders.pack.R;
 
 import java.io.IOException;
 
@@ -42,11 +43,6 @@ public class RegistrationIntentService extends IntentService {
     @Override
     protected void onHandleIntent(Intent intent) {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-        if(false) {
-            Intent registrationComplete = new Intent(GcmPreferences.REGISTRATION_COMPLETE);
-            LocalBroadcastManager.getInstance(this).sendBroadcast(registrationComplete);
-            return;
-        }
 
         try {
             // [START register_for_gcm]
@@ -56,8 +52,7 @@ public class RegistrationIntentService extends IntentService {
             // See https://developers.google.com/cloud-messaging/android/start for details on this file.
             // [START get_token]
             InstanceID instanceID = InstanceID.getInstance(this);
-            String token = instanceID.getToken(getString(R.string.gcm_defaultSenderId),
-                    GoogleCloudMessaging.INSTANCE_ID_SCOPE, null);
+            String token = instanceID.getToken(getString(R.string.gcm_defaultSenderId), GoogleCloudMessaging.INSTANCE_ID_SCOPE, null);
             // [END get_token]
             Log.i(TAG, "GCM Registration Token: " + token);
 
@@ -65,18 +60,20 @@ public class RegistrationIntentService extends IntentService {
             sendRegistrationToServer(token);
 
             // Subscribe to topic channels
-            subscribeTopics(token);
+            subscribeTopics(this, token, TOPICS);
 
             // You should store a boolean that indicates whether the generated token has been
             // sent to your server. If the boolean is false, send the token to your server,
             // otherwise your server should have already received the token.
             sharedPreferences.edit().putBoolean(GcmPreferences.SENT_TOKEN_TO_SERVER, true).apply();
+            sharedPreferences.edit().putString(GcmPreferences.TOKEN, token).apply();
             // [END register_for_gcm]
         } catch (Exception e) {
             Log.d(TAG, "Failed to complete token refresh", e);
             // If an exception happens while fetching the new token or updating our registration data
             // on a third-party server, this ensures that we'll attempt the update at a later time.
             sharedPreferences.edit().putBoolean(GcmPreferences.SENT_TOKEN_TO_SERVER, false).apply();
+            sharedPreferences.edit().putString(GcmPreferences.TOKEN, null).apply();
         }
         // Notify UI that registration has completed, so the progress indicator can be hidden.
         Intent registrationComplete = new Intent(GcmPreferences.REGISTRATION_COMPLETE);
@@ -98,14 +95,22 @@ public class RegistrationIntentService extends IntentService {
     /**
      * Subscribe to any GCM topics of interest, as defined by the TOPICS constant.
      *
-     * @param token GCM token
      * @throws IOException if unable to reach the GCM PubSub service
      */
     // [START subscribe_topics]
-    private void subscribeTopics(String token) throws IOException {
-        GcmPubSub pubSub = GcmPubSub.getInstance(this);
-        for (String topic : TOPICS) {
+    public static void subscribeTopics(Context context, String token, String[] topics) throws IOException {
+        GcmPubSub pubSub = GcmPubSub.getInstance(context);
+        for (String topic : topics) {
             pubSub.subscribe(token, "/topics/" + topic, null);
+        }
+    }
+    // [END subscribe_topics]
+
+    // [START unsubscribe_topics]
+    public static void unsubscribeTopics(Context context, String token, String[] topics) throws IOException {
+        GcmPubSub pubSub = GcmPubSub.getInstance(context);
+        for (String topic : topics) {
+            pubSub.unsubscribe(token, "/topics/" + topic);
         }
     }
     // [END subscribe_topics]

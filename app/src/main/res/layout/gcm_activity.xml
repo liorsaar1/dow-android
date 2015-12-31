@@ -17,4 +17,16 @@
         android:layout_height="wrap_content"
         android:id="@+id/registrationProgressBar" />
 
+    <Button
+        android:id="@+id/gcmSubscribe"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="subscribe feed"/>
+
+    <Button
+        android:id="@+id/gcmUnsubscribe"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="unsubscribe feed"/>
+
 </LinearLayout>
