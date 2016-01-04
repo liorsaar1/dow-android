@@ -17,8 +17,6 @@
 package com.districtofwonders.pack.gcm;
 
 import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -40,7 +38,6 @@ public class GcmTestActivity extends AppCompatActivity {
     private TextView mInformationTextView;
     private Button mSub, mUnsub;
     private GcmHelper gcmHelper;
-    private String token;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,18 +45,48 @@ public class GcmTestActivity extends AppCompatActivity {
         setContentView(R.layout.gcm_activity);
 
         mRegistrationProgressBar = (ProgressBar) findViewById(R.id.registrationProgressBar);
-        mRegistrationBroadcastReceiver = new BroadcastReceiver() {
+//        mRegistrationBroadcastReceiver = new BroadcastReceiver() {
+//            @Override
+//            public void onReceive(Context context, Intent intent) {
+//                mRegistrationProgressBar.setVisibility(ProgressBar.GONE);
+//                SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+//                token = sharedPreferences.getString(GcmPreferences.TOKEN, null);
+//                if (token == null) {
+//                    String error = sharedPreferences.getString(GcmPreferences.REGISTRATION_ERROR, null);
+//                    Toast.makeText(GcmTestActivity.this, "ERROR:"+ error, Toast.LENGTH_LONG).show();
+//                    return;
+//                }
+//
+//                boolean sentToken = sharedPreferences.getBoolean(GcmPreferences.SENT_TOKEN_TO_SERVER, false);
+//                if (sentToken) {
+//                    mInformationTextView.setText(getString(R.string.gcm_send_message));
+//                } else {
+//                    mInformationTextView.setText(getString(R.string.gcm_token_error_message));
+//                }
+//            }
+//        };
+        mInformationTextView = (TextView) findViewById(R.id.informationTextView);
+        mSub = (Button)findViewById(R.id.gcmSubscribe);
+        mSub.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onReceive(Context context, Intent intent) {
-                mRegistrationProgressBar.setVisibility(ProgressBar.GONE);
-                SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
-                token = sharedPreferences.getString(GcmPreferences.TOKEN, null);
-                if (token == null) {
-                    String error = sharedPreferences.getString(GcmPreferences.REGISTRATION_ERROR, null);
-                    Toast.makeText(GcmTestActivity.this, "ERROR:"+ error, Toast.LENGTH_LONG).show();
-                    return;
-                }
+            public void onClick(View v) {
+                gcmHelper.subscribeTopics(GcmTestActivity.this, new String[]{"feed"});
+            }
+        });
+        mUnsub = (Button)findViewById(R.id.gcmUnsubscribe);
+        mUnsub.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                gcmHelper.unsubscribeTopics(GcmTestActivity.this, new String[]{"feed"});
+            }
+        });
 
+        gcmHelper = new GcmHelper(this, new GcmHelper.RegistrationListener() {
+
+            @Override
+            public void success() {
+                mRegistrationProgressBar.setVisibility(ProgressBar.GONE);
+                SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(GcmTestActivity.this);
                 boolean sentToken = sharedPreferences.getBoolean(GcmPreferences.SENT_TOKEN_TO_SERVER, false);
                 if (sentToken) {
                     mInformationTextView.setText(getString(R.string.gcm_send_message));
@@ -67,30 +94,19 @@ public class GcmTestActivity extends AppCompatActivity {
                     mInformationTextView.setText(getString(R.string.gcm_token_error_message));
                 }
             }
-        };
-        mInformationTextView = (TextView) findViewById(R.id.informationTextView);
-        mSub = (Button)findViewById(R.id.gcmSubscribe);
-        mUnsub = (Button)findViewById(R.id.gcmUnsubscribe);
-        mSub.setOnClickListener(new View.OnClickListener() {
+
             @Override
-            public void onClick(View v) {
-                gcmHelper.subscribeTopics(GcmTestActivity.this, token, new String[]{"feed"});
-            }
-        });
-        mUnsub.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                gcmHelper.unsubscribeTopics(GcmTestActivity.this, token, new String[]{"feed"});
+            public void error(String error) {
+                mRegistrationProgressBar.setVisibility(ProgressBar.GONE);
+                Toast.makeText(GcmTestActivity.this, "ERROR:" + error, Toast.LENGTH_LONG).show();
             }
         });
 
-        gcmHelper = new GcmHelper(this, mRegistrationBroadcastReceiver);
-
-        if (gcmHelper.checkPlayServices(this)) {
-            // Start IntentService to register this application with GCM.
-            Intent intent = new Intent(this, RegistrationIntentService.class);
-            startService(intent);
-        }
+//        if (gcmHelper.checkPlayServices(this)) {
+//            // Start IntentService to register this application with GCM.
+//            Intent intent = new Intent(this, RegistrationIntentService.class);
+//            startService(intent);
+//        }
     }
 
     @Override

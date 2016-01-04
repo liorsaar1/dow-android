@@ -2,8 +2,12 @@ package com.districtofwonders.pack.gcm;
 
 import android.app.Activity;
 import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
+import android.preference.PreferenceManager;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.widget.Toast;
@@ -21,10 +25,42 @@ public class GcmHelper {
     private static final int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;
     private final BroadcastReceiver mRegistrationBroadcastReceiver;
     private static Class<? extends Activity> sParentActivityClass;
+    private final RegistrationListener mRegistrationListener;
+    public String mToken;
 
-    public GcmHelper(Activity parentActivity, BroadcastReceiver broadcastReceiver) {
+    public interface RegistrationListener {
+        void success();
+        void error(String error);
+    }
+
+    public GcmHelper(Activity parentActivity, RegistrationListener registrationListener) {
         sParentActivityClass = parentActivity.getClass();
-        mRegistrationBroadcastReceiver = broadcastReceiver;
+        mRegistrationListener = registrationListener;
+        mRegistrationBroadcastReceiver = new BroadcastReceiver() {
+
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+                String token = sharedPreferences.getString(GcmPreferences.TOKEN, null);
+                // error - no token
+                if (token == null) {
+                    String error = sharedPreferences.getString(GcmPreferences.REGISTRATION_ERROR, null);
+                    mRegistrationListener.error(error);
+                    return;
+                }
+                // success
+                mToken = token;
+                mRegistrationListener.success();
+            }
+        };
+
+        if (checkPlayServices(parentActivity)) {
+            // Start IntentService to register this application with GCM.
+            Intent intent = new Intent(parentActivity, RegistrationIntentService.class);
+            parentActivity.startService(intent);
+        }
+
+
     }
 
     public static Class getParentActivityClass() {
@@ -61,7 +97,11 @@ public class GcmHelper {
         LocalBroadcastManager.getInstance(activity).unregisterReceiver(mRegistrationBroadcastReceiver);
     }
 
-    public void subscribeTopics(final Activity activity, String token, String[] topics) {
+    public void subscribeTopics(final Activity activity, String[] topics) {
+        subscribeTopics(activity, mToken, topics);
+    }
+
+    private void subscribeTopics(final Activity activity, String token, String[] topics) {
         new AsyncTask<Object, Void, Exception>() {
             @Override
             protected Exception doInBackground(Object... params) {
@@ -86,7 +126,11 @@ public class GcmHelper {
         }.execute(token, topics);
     }
 
-    public void unsubscribeTopics(final Activity activity, String token, String[] topics) {
+    public void unsubscribeTopics(final Activity activity, String[] topics) {
+        unsubscribeTopics(activity, mToken, topics);
+    }
+
+    private void unsubscribeTopics(final Activity activity, String token, String[] topics) {
         new AsyncTask<Object, Void, Exception>() {
             @Override
             protected Exception doInBackground(Object... params) {
