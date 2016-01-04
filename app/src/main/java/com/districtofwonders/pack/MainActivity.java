@@ -7,6 +7,7 @@ package com.districtofwonders.pack;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.os.Bundle;
+import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
@@ -18,6 +19,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+
+import com.districtofwonders.pack.fragment.feed.FeedsFragment;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
@@ -55,6 +58,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
         mSelectedId = savedInstanceState == null ? R.id.drawer_nav_feed : savedInstanceState.getInt(SELECTED_ITEM_ID);
         navigate(mSelectedId);
+
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                setFeedsFragment("fff");
+            }
+        }, 5000);
     }
 
     private boolean didUserSeeDrawer() {
@@ -90,6 +100,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private void setFragment(int position) {
         FragmentTransaction tx = getSupportFragmentManager().beginTransaction(); // TODO refactor
         tx.replace(R.id.main_content, Fragment.instantiate(MainActivity.this, fragments[position]));
+        tx.commit();
+    }
+
+    private void setFeedsFragment(String topic) {
+        FragmentTransaction tx = getSupportFragmentManager().beginTransaction(); // TODO refactor
+        Fragment feedsFragment = FeedsFragment.newInstance(topic);
+        tx.replace(R.id.main_content, feedsFragment);
         tx.commit();
     }
 

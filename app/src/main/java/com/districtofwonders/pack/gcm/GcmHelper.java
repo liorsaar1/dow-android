@@ -18,7 +18,6 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.gcm.GcmPubSub;
 
-import java.io.IOException;
 import java.util.Map;
 
 /**
@@ -86,9 +85,9 @@ public class GcmHelper {
     }
 
     public void setSubscriptions(final Activity activity, final Map<String, Boolean> topicsMap) {
-        new AsyncTask<Object, Void, Exception>() {
+        new AsyncTask<Object, Void, Throwable>() {
             @Override
-            protected Exception doInBackground(Object... params) {
+            protected Throwable doInBackground(Object... params) {
                 GcmPubSub pubSub = GcmPubSub.getInstance(activity);
                 try {
                     for (String key : topicsMap.keySet()) {
@@ -101,16 +100,16 @@ public class GcmHelper {
                             Log.e(TAG, "unsubscribe:" + key);
                         }
                     }
-                } catch (IOException e) {
-                    return e;
+                } catch (Throwable t) {
+                    return t;
                 }
                 return null;
             }
 
             @Override
-            protected void onPostExecute(Exception exception) {
-                if (exception != null) {
-                    Toast.makeText(activity, "ERROR:" + exception.getMessage(), Toast.LENGTH_LONG).show();
+            protected void onPostExecute(Throwable t) {
+                if (t != null) {
+                    Toast.makeText(activity, "ERROR:" + t.getMessage(), Toast.LENGTH_LONG).show();
                     return;
                 }
                 Toast.makeText(activity, "Subscriptions Updated.", Toast.LENGTH_LONG).show();

@@ -1,6 +1,5 @@
 package com.districtofwonders.pack.fragment.feed;
 
-import android.content.Context;
 import android.os.Bundle;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
@@ -19,17 +18,22 @@ import java.util.List;
 public class FeedsFragment extends Fragment {
 
     public static final FeedDesc[] feeds = {
-            new FeedDesc() {{ title = "StarShipSofa"; url = "http://www.starshipsofa.com/feed/"; }},
-            new FeedDesc() {{ title = "Far Fetched Fables"; url = "http://farfetchedfables.com/feed/"; }},
-            new FeedDesc() {{ title = "Tales to Terrify"; url = "http://talestoterrify.com/feed/"; }}
+            new FeedDesc() {{ title = "StarShipSofa";       topic = "sss"; url = "http://www.starshipsofa.com/feed/"; }},
+            new FeedDesc() {{ title = "Far Fetched Fables"; topic = "fff"; url = "http://farfetchedfables.com/feed/"; }},
+            new FeedDesc() {{ title = "Tales to Terrify";   topic = "ttt"; url = "http://talestoterrify.com/feed/"; }}
     };
+    private static final String ARG_TOPIC = "topic";
 
     private TabLayout mTabLayout;
     private ViewPager mPager;
     private FeedsPagerAdapter mAdapter;
 
-    public static Fragment newInstance(Context context) {
-        return new FeedsFragment();
+    public static Fragment newInstance(String topic) {
+        FeedsFragment feedsFragment = new FeedsFragment();
+        Bundle arguments = new Bundle();
+        arguments.putString(ARG_TOPIC, topic);
+        feedsFragment.setArguments(arguments);
+        return feedsFragment;
     }
 
     @Override
@@ -44,13 +48,36 @@ public class FeedsFragment extends Fragment {
         mTabLayout.setupWithViewPager(mPager);
 
         mPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(mTabLayout));
+
+        // display selected page
+        Bundle arguments = getArguments();
+        if (arguments != null) {
+            String topic = arguments.getString(ARG_TOPIC);
+            if (topic != null) {
+                setFeed(topic);
+            }
+        }
         return root;
+    }
+
+    public void setFeed(String topic) {
+        int pageNumber = FeedDesc.getTopic(feeds, topic);
+        mPager.setCurrentItem(pageNumber);
     }
 }
 
 class FeedDesc {
     public String title;
     public String url;
+    public String topic;
+
+    public static int getTopic(FeedDesc[] feeds, String topic) {
+        for (int i = 0; i < feeds.length; i++) {
+            if (feeds[i].topic.equals(topic))
+                return i;
+        }
+        throw new IllegalArgumentException("Illegal topic " + topic);
+    }
 }
 
 class FeedsPagerAdapter extends FragmentStatePagerAdapter {
