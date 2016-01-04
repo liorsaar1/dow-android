@@ -16,10 +16,12 @@
 
 package com.districtofwonders.pack.gcm;
 
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ProgressBar;
@@ -32,24 +34,24 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class GcmTestActivity extends AppCompatActivity {
-
-    private static final String TAG = "GcmTestActivity";
-
+    private static final String TAG = GcmTestActivity.class.getSimpleName();
     private ProgressBar mRegistrationProgressBar;
     private TextView mInformationTextView;
     private GcmHelper gcmHelper;
-    private Map<String, Boolean> topicsMap;
+    private Map<String, Boolean> topicsMap = new HashMap<String, Boolean>() {
+        {
+            put("global", true);
+            put("feed", false);
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.gcm_activity);
+        Log.e(TAG, "--------------------------------------- create");
 
-        // create topics map
-        topicsMap = new HashMap<>();
-        topicsMap.put("global", true);
-        topicsMap.put("feed", false);
-
+        // UI
         mRegistrationProgressBar = (ProgressBar) findViewById(R.id.registrationProgressBar);
         mInformationTextView = (TextView) findViewById(R.id.informationTextView);
         Button mSub = (Button) findViewById(R.id.gcmSubscribe);
@@ -89,17 +91,28 @@ public class GcmTestActivity extends AppCompatActivity {
                 Toast.makeText(GcmTestActivity.this, "ERROR:" + error, Toast.LENGTH_LONG).show();
             }
         });
+
     }
 
     @Override
     protected void onPause() {
+        Log.e(TAG, "onPause: gcmHelper:" + gcmHelper);
         gcmHelper.onPause(this);
         super.onPause();
     }
 
     @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        Log.e(TAG, "-----  new intent");
+        String from = intent.getStringExtra(GcmHelper.NOTIFICATION_FROM);
+        Log.e(TAG, "from:" + from);
+    }
+
+    @Override
     protected void onResume() {
         super.onResume();
+        Log.e(TAG, "onResume: gcmHelper:" + gcmHelper);
         gcmHelper.onResume(this);
     }
 }

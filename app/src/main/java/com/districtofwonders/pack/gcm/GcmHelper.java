@@ -1,12 +1,14 @@
 package com.districtofwonders.pack.gcm;
 
 import android.app.Activity;
+import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
+import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
@@ -23,9 +25,13 @@ import java.util.Map;
  * Created by liorsaar on 2015-12-31
  */
 public class GcmHelper {
+    public static final String NOTIFICATION_FROM = "NOTIFICATION_FROM";
+    public static final String NOTIFICATION_DATA = "NOTIFICATION_DATA";
+    public static final String NOTIFICATION_DATA_MESSAGE = "message";
 
+    private static final String TAG = GcmHelper.class.getSimpleName();
     private static final int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;
-    private static Class<? extends Activity> sParentActivityClass;
+    private static Class<? extends Activity> sParentActivityClass = GcmTestActivity.class;
     private final BroadcastReceiver mRegistrationBroadcastReceiver;
     private final RegistrationListener mRegistrationListener;
     private String mToken;
@@ -89,8 +95,10 @@ public class GcmHelper {
                         Boolean value = topicsMap.get(key);
                         if (value) {
                             pubSub.subscribe(mToken, "/topics/" + key, null);
+                            Log.e(TAG, "subscribe:" + key);
                         } else {
                             pubSub.unsubscribe(mToken, "/topics/" + key);
+                            Log.e(TAG, "unsubscribe:" + key);
                         }
                     }
                 } catch (IOException e) {
@@ -110,8 +118,13 @@ public class GcmHelper {
         }.execute();
     }
 
-    public static Class getParentActivityClass() {
-        return sParentActivityClass;
+    public static Intent getParentActivityIntent(Context context, String from, Bundle data) {
+        Intent intent = new Intent(context, sParentActivityClass);
+//        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        intent.addFlags(PendingIntent.FLAG_UPDATE_CURRENT | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        intent.putExtra(NOTIFICATION_FROM, from);
+        intent.putExtra(NOTIFICATION_DATA, data);
+        return intent;
     }
 
     public void onResume(Activity activity) {

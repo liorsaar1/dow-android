@@ -24,7 +24,6 @@ import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.NotificationCompat;
-import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 
 import com.districtofwonders.pack.R;
@@ -44,7 +43,7 @@ public class MyGcmListenerService extends GcmListenerService {
     // [START receive_message]
     @Override
     public void onMessageReceived(String from, Bundle data) {
-        String message = data.getString("message");
+        String message = data.getString(GcmHelper.NOTIFICATION_DATA_MESSAGE);
         Log.d(TAG, "From: " + from);
         Log.d(TAG, "Message: " + message);
 
@@ -66,7 +65,7 @@ public class MyGcmListenerService extends GcmListenerService {
          * In some cases it may be useful to show a notification indicating to the user
          * that a message was received.
          */
-        sendNotification(message);
+        sendNotification(from, data);
         // [END_EXCLUDE]
     }
     // [END receive_message]
@@ -74,27 +73,26 @@ public class MyGcmListenerService extends GcmListenerService {
     /**
      * Create and show a simple notification containing the received GCM message.
      *
-     * @param message GCM message received.
+     * @param from
+     * @param data GCM data bundle
      */
-    private void sendNotification(String message) {
-        Class<? extends AppCompatActivity> activityClass = GcmHelper.getParentActivityClass();
-        Intent intent = new Intent(this, activityClass);
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+    private void sendNotification(String from, Bundle data) {
         int requestCode = 0;
-        PendingIntent pendingIntent = PendingIntent.getActivity(this, requestCode, intent, PendingIntent.FLAG_ONE_SHOT);
+        Intent targetActivityIntent = GcmHelper.getParentActivityIntent(this, from, data);
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, requestCode, targetActivityIntent, PendingIntent.FLAG_ONE_SHOT);
 
         Uri defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+        String message = data.getString(GcmHelper.NOTIFICATION_DATA_MESSAGE);
         NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this)
-                .setSmallIcon(R.drawable.ic_stat_ic_notification)
+                .setSmallIcon(R.mipmap.ic_launcher)
                 .setContentTitle("District of Wonders")
                 .setContentText(message)
                 .setAutoCancel(true)
                 .setSound(defaultSoundUri)
                 .setContentIntent(pendingIntent);
 
-        NotificationManager notificationManager =
-                (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-
-        notificationManager.notify(0 /* ID of notification */, notificationBuilder.build());
+        NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        int notificationId = 0;
+        notificationManager.notify(notificationId, notificationBuilder.build());
     }
 }
