@@ -14,8 +14,10 @@ import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
+import com.google.android.gms.gcm.GcmPubSub;
 
 import java.io.IOException;
+import java.util.Map;
 
 /**
  * Created by liorsaar on 2015-12-31
@@ -23,17 +25,12 @@ import java.io.IOException;
 public class GcmHelper {
 
     private static final int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;
-    private final BroadcastReceiver mRegistrationBroadcastReceiver;
     private static Class<? extends Activity> sParentActivityClass;
+    private final BroadcastReceiver mRegistrationBroadcastReceiver;
     private final RegistrationListener mRegistrationListener;
-    public String mToken;
+    private String mToken;
 
-    public interface RegistrationListener {
-        void success();
-        void error(String error);
-    }
-
-    public GcmHelper(Activity parentActivity, RegistrationListener registrationListener) {
+    public GcmHelper(final Activity parentActivity, final Map<String, Boolean> topicsMap, RegistrationListener registrationListener) {
         sParentActivityClass = parentActivity.getClass();
         mRegistrationListener = registrationListener;
         mRegistrationBroadcastReceiver = new BroadcastReceiver() {
@@ -50,6 +47,7 @@ public class GcmHelper {
                 }
                 // success
                 mToken = token;
+                setSubscriptions(parentActivity, topicsMap);
                 mRegistrationListener.success();
             }
         };
@@ -59,12 +57,6 @@ public class GcmHelper {
             Intent intent = new Intent(parentActivity, RegistrationIntentService.class);
             parentActivity.startService(intent);
         }
-
-
-    }
-
-    public static Class getParentActivityClass() {
-        return sParentActivityClass;
     }
 
     /**
@@ -87,6 +79,41 @@ public class GcmHelper {
         return true;
     }
 
+    public void setSubscriptions(final Activity activity, final Map<String, Boolean> topicsMap) {
+        new AsyncTask<Object, Void, Exception>() {
+            @Override
+            protected Exception doInBackground(Object... params) {
+                GcmPubSub pubSub = GcmPubSub.getInstance(activity);
+                try {
+                    for (String key : topicsMap.keySet()) {
+                        Boolean value = topicsMap.get(key);
+                        if (value) {
+                            pubSub.subscribe(mToken, "/topics/" + key, null);
+                        } else {
+                            pubSub.unsubscribe(mToken, "/topics/" + key);
+                        }
+                    }
+                } catch (IOException e) {
+                    return e;
+                }
+                return null;
+            }
+
+            @Override
+            protected void onPostExecute(Exception exception) {
+                if (exception != null) {
+                    Toast.makeText(activity, "ERROR:" + exception.getMessage(), Toast.LENGTH_LONG).show();
+                    return;
+                }
+                Toast.makeText(activity, "Subscriptions Updated.", Toast.LENGTH_LONG).show();
+            }
+        }.execute();
+    }
+
+    public static Class getParentActivityClass() {
+        return sParentActivityClass;
+    }
+
     public void onResume(Activity activity) {
         LocalBroadcastManager.getInstance(activity).registerReceiver(
                 mRegistrationBroadcastReceiver,
@@ -97,62 +124,9 @@ public class GcmHelper {
         LocalBroadcastManager.getInstance(activity).unregisterReceiver(mRegistrationBroadcastReceiver);
     }
 
-    public void subscribeTopics(final Activity activity, String[] topics) {
-        subscribeTopics(activity, mToken, topics);
+    public interface RegistrationListener {
+        void success();
+
+        void error(String error);
     }
-
-    private void subscribeTopics(final Activity activity, String token, String[] topics) {
-        new AsyncTask<Object, Void, Exception>() {
-            @Override
-            protected Exception doInBackground(Object... params) {
-                String token = (String) params[0];
-                String[] topics = (String[]) params[1];
-                try {
-                    RegistrationIntentService.subscribeTopics(activity, token, topics);
-                } catch (IOException e) {
-                    return e;
-                }
-                return null;
-            }
-
-            @Override
-            protected void onPostExecute(Exception exception) {
-                if (exception != null) {
-                    Toast.makeText(activity, "ERROR:" + exception.getMessage(), Toast.LENGTH_LONG).show();
-                    return;
-                }
-                Toast.makeText(activity, "Subscribed", Toast.LENGTH_LONG).show();
-            }
-        }.execute(token, topics);
-    }
-
-    public void unsubscribeTopics(final Activity activity, String[] topics) {
-        unsubscribeTopics(activity, mToken, topics);
-    }
-
-    private void unsubscribeTopics(final Activity activity, String token, String[] topics) {
-        new AsyncTask<Object, Void, Exception>() {
-            @Override
-            protected Exception doInBackground(Object... params) {
-                String token = (String) params[0];
-                String[] topics = (String[]) params[1];
-                try {
-                    RegistrationIntentService.unsubscribeTopics(activity, token, topics);
-                } catch (IOException e) {
-                    return e;
-                }
-                return null;
-            }
-
-            @Override
-            protected void onPostExecute(Exception exception) {
-                if (exception != null) {
-                    Toast.makeText(activity, "ERROR:" + exception.getMessage(), Toast.LENGTH_LONG).show();
-                    return;
-                }
-                Toast.makeText(activity, "Subscribed", Toast.LENGTH_LONG).show();
-            }
-        }.execute(token, topics);
-    }
-
 }

@@ -1,12 +1,12 @@
 /**
  * Copyright 2015 Google Inc. All Rights Reserved.
- *
+ * <p/>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * <p/>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p/>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -16,7 +16,6 @@
 
 package com.districtofwonders.pack.gcm;
 
-import android.content.BroadcastReceiver;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -29,59 +28,48 @@ import android.widget.Toast;
 
 import com.districtofwonders.pack.R;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class GcmTestActivity extends AppCompatActivity {
 
     private static final String TAG = "GcmTestActivity";
 
-    private BroadcastReceiver mRegistrationBroadcastReceiver;
     private ProgressBar mRegistrationProgressBar;
     private TextView mInformationTextView;
-    private Button mSub, mUnsub;
     private GcmHelper gcmHelper;
+    private Map<String, Boolean> topicsMap;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.gcm_activity);
 
+        // create topics map
+        topicsMap = new HashMap<>();
+        topicsMap.put("global", true);
+        topicsMap.put("feed", false);
+
         mRegistrationProgressBar = (ProgressBar) findViewById(R.id.registrationProgressBar);
-//        mRegistrationBroadcastReceiver = new BroadcastReceiver() {
-//            @Override
-//            public void onReceive(Context context, Intent intent) {
-//                mRegistrationProgressBar.setVisibility(ProgressBar.GONE);
-//                SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
-//                token = sharedPreferences.getString(GcmPreferences.TOKEN, null);
-//                if (token == null) {
-//                    String error = sharedPreferences.getString(GcmPreferences.REGISTRATION_ERROR, null);
-//                    Toast.makeText(GcmTestActivity.this, "ERROR:"+ error, Toast.LENGTH_LONG).show();
-//                    return;
-//                }
-//
-//                boolean sentToken = sharedPreferences.getBoolean(GcmPreferences.SENT_TOKEN_TO_SERVER, false);
-//                if (sentToken) {
-//                    mInformationTextView.setText(getString(R.string.gcm_send_message));
-//                } else {
-//                    mInformationTextView.setText(getString(R.string.gcm_token_error_message));
-//                }
-//            }
-//        };
         mInformationTextView = (TextView) findViewById(R.id.informationTextView);
-        mSub = (Button)findViewById(R.id.gcmSubscribe);
+        Button mSub = (Button) findViewById(R.id.gcmSubscribe);
         mSub.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                gcmHelper.subscribeTopics(GcmTestActivity.this, new String[]{"feed"});
+                topicsMap.put("feed", true);
+                gcmHelper.setSubscriptions(GcmTestActivity.this, topicsMap);
             }
         });
-        mUnsub = (Button)findViewById(R.id.gcmUnsubscribe);
+        Button mUnsub = (Button) findViewById(R.id.gcmUnsubscribe);
         mUnsub.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                gcmHelper.unsubscribeTopics(GcmTestActivity.this, new String[]{"feed"});
+                topicsMap.put("feed", false);
+                gcmHelper.setSubscriptions(GcmTestActivity.this, topicsMap);
             }
         });
 
-        gcmHelper = new GcmHelper(this, new GcmHelper.RegistrationListener() {
+        gcmHelper = new GcmHelper(this, topicsMap, new GcmHelper.RegistrationListener() {
 
             @Override
             public void success() {
@@ -101,18 +89,6 @@ public class GcmTestActivity extends AppCompatActivity {
                 Toast.makeText(GcmTestActivity.this, "ERROR:" + error, Toast.LENGTH_LONG).show();
             }
         });
-
-//        if (gcmHelper.checkPlayServices(this)) {
-//            // Start IntentService to register this application with GCM.
-//            Intent intent = new Intent(this, RegistrationIntentService.class);
-//            startService(intent);
-//        }
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        gcmHelper.onResume(this);
     }
 
     @Override
@@ -121,4 +97,9 @@ public class GcmTestActivity extends AppCompatActivity {
         super.onPause();
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        gcmHelper.onResume(this);
+    }
 }

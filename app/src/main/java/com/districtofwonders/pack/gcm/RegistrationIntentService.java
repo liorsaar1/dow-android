@@ -34,7 +34,6 @@ import java.io.IOException;
 public class RegistrationIntentService extends IntentService {
 
     private static final String TAG = "RegIntentService";
-    private static final String[] TOPICS = {"global"};
 
     public RegistrationIntentService() {
         super(TAG);
@@ -58,9 +57,6 @@ public class RegistrationIntentService extends IntentService {
 
             // TODO: Implement this method to send any registration to your app's servers.
             sendRegistrationToServer(token);
-
-            // Subscribe to topic channels
-            subscribeTopics(this, token, TOPICS);
 
             // You should store a boolean that indicates whether the generated token has been
             // sent to your server. If the boolean is false, send the token to your server,
@@ -114,6 +110,4 @@ public class RegistrationIntentService extends IntentService {
             pubSub.unsubscribe(token, "/topics/" + topic);
         }
     }
-    // [END subscribe_topics]
-
 }
