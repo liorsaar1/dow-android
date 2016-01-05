@@ -18,9 +18,9 @@ import java.util.List;
 public class FeedsFragment extends Fragment {
 
     public static final FeedDesc[] feeds = {
-            new FeedDesc() {{ title = "StarShipSofa";       topic = "sss"; url = "http://www.starshipsofa.com/feed/"; }},
-            new FeedDesc() {{ title = "Far Fetched Fables"; topic = "fff"; url = "http://farfetchedfables.com/feed/"; }},
-            new FeedDesc() {{ title = "Tales to Terrify";   topic = "ttt"; url = "http://talestoterrify.com/feed/"; }}
+            new FeedDesc() {{ title = "StarShipSofa";       topic = "/topics/sss"; url = "http://www.starshipsofa.com/feed/"; }},
+            new FeedDesc() {{ title = "Far Fetched Fables"; topic = "/topics/fff"; url = "http://farfetchedfables.com/feed/"; }},
+            new FeedDesc() {{ title = "Tales to Terrify";   topic = "/topics/ttt"; url = "http://talestoterrify.com/feed/"; }}
     };
     private static final String ARG_TOPIC = "topic";
 

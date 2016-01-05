@@ -4,10 +4,10 @@ package com.districtofwonders.pack;
  * Date 15/06/15
  */
 
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.os.Bundle;
-import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
@@ -17,30 +17,39 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Toast;
 
+import com.districtofwonders.pack.fragment.NotificationsFragment;
 import com.districtofwonders.pack.fragment.feed.FeedsFragment;
+import com.districtofwonders.pack.gcm.GcmHelper;
+
+import java.util.Map;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
+    public static final boolean DEBUG = true;
     private static final String SELECTED_ITEM_ID = "selected_item_id";
     private static final String FIRST_TIME = "first_time";
-    public static final boolean DEBUG = true; ;
-    private Toolbar mToolbar;
-    private NavigationView mDrawer;
+    private static final String TAG = MainActivity.class.getSimpleName();
+    final String[] fragments = {
+            "com.districtofwonders.pack.fragment.feed.FeedsFragment",
+            "com.districtofwonders.pack.fragment.AboutFragment"};
     private DrawerLayout mDrawerLayout;
     private ActionBarDrawerToggle mDrawerToggle;
     private int mSelectedId;
     private boolean mUserSawDrawer = false;
+    private GcmHelper gcmHelper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main_activity);
-        mToolbar = (Toolbar) findViewById(R.id.app_bar);
+        Toolbar mToolbar = (Toolbar) findViewById(R.id.app_bar);
         setSupportActionBar(mToolbar);
-        mDrawer = (NavigationView) findViewById(R.id.main_drawer);
+        NavigationView mDrawer = (NavigationView) findViewById(R.id.main_drawer);
         mDrawer.setNavigationItemSelectedListener(this);
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         mDrawerToggle = new ActionBarDrawerToggle(this,
@@ -59,12 +68,20 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         mSelectedId = savedInstanceState == null ? R.id.drawer_nav_feed : savedInstanceState.getInt(SELECTED_ITEM_ID);
         navigate(mSelectedId);
 
-        new Handler().postDelayed(new Runnable() {
+        // gcm notifications handler
+        Map<String, Boolean> topicsMap = NotificationsFragment.getTopicsMap();
+        gcmHelper = new GcmHelper(this, topicsMap, new GcmHelper.RegistrationListener() {
+
             @Override
-            public void run() {
-                setFeedsFragment("fff");
+            public void success() {
             }
-        }, 5000);
+
+            @Override
+            public void error(String error) {
+                Log.e(TAG, "RegistrationListener:" + error);
+                Toast.makeText(MainActivity.this, "Error while connecting to the notification server: " + error, Toast.LENGTH_LONG).show();
+            }
+        });
     }
 
     private boolean didUserSeeDrawer() {
@@ -103,16 +120,19 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         tx.commit();
     }
 
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        mDrawerToggle.onConfigurationChanged(newConfig);
+    }
+
     private void setFeedsFragment(String topic) {
-        FragmentTransaction tx = getSupportFragmentManager().beginTransaction(); // TODO refactor
+        mDrawerLayout.closeDrawer(GravityCompat.START);
+        FragmentTransaction tx = getSupportFragmentManager().beginTransaction();
         Fragment feedsFragment = FeedsFragment.newInstance(topic);
         tx.replace(R.id.main_content, feedsFragment);
         tx.commit();
     }
-
-    final String[] fragments ={
-            "com.districtofwonders.pack.fragment.feed.FeedsFragment",
-            "com.districtofwonders.pack.fragment.AboutFragment"};
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -136,12 +156,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     @Override
-    public void onConfigurationChanged(Configuration newConfig) {
-        super.onConfigurationChanged(newConfig);
-        mDrawerToggle.onConfigurationChanged(newConfig);
-    }
-
-    @Override
     public boolean onNavigationItemSelected(MenuItem menuItem) {
 
         menuItem.setChecked(true);
@@ -152,17 +166,50 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     @Override
-    protected void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-        outState.putInt(SELECTED_ITEM_ID, mSelectedId);
-    }
-
-    @Override
     public void onBackPressed() {
         if (mDrawerLayout.isDrawerOpen(GravityCompat.START)) {
             mDrawerLayout.closeDrawer(GravityCompat.START);
         } else {
             super.onBackPressed();
         }
+    }
+
+    @Override
+    protected void onPause() {
+        Log.e(TAG, "onPause:");
+        gcmHelper.onPause(this);
+        super.onPause();
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        String from = intent.getStringExtra(GcmHelper.NOTIFICATION_FROM);
+        Log.e(TAG, "onNewIntent: from:" + from);
+        // assert
+        if (from == null) {
+            Toast.makeText(this, "Malformed Notification", Toast.LENGTH_LONG).show();
+            return;
+        }
+        // global notification - should probably launch a url
+        if (from.startsWith("/topics/global")) {
+            Toast.makeText(this, "Global Notification", Toast.LENGTH_LONG).show();
+            return;
+        }
+        // feed notification
+        setFeedsFragment(from);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        Log.e(TAG, "onResume:");
+        gcmHelper.onResume(this);
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putInt(SELECTED_ITEM_ID, mSelectedId);
     }
 }
