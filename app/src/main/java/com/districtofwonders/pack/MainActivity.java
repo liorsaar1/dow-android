@@ -9,6 +9,7 @@ import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
+import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.design.widget.NavigationView;
@@ -22,7 +23,6 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.Toast;
 
 import com.districtofwonders.pack.fragment.NotificationsFragment;
 import com.districtofwonders.pack.fragment.feed.FeedsFragment;
@@ -78,7 +78,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         // check if invoked from notification
         String from = getIntent().getStringExtra(GcmHelper.NOTIFICATION_FROM);
         if (from != null) {
-            onNewIntentNotification(getIntent());
+            handleNotification(getIntent());
         }
     }
 
@@ -215,18 +215,28 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             return;
         }
         // 'from' exists - handle notification
-        onNewIntentNotification(intent);
+        handleNotification(intent);
     }
 
-    private void onNewIntentNotification(Intent intent) {
+    private void handleNotification(Intent intent) {
         String from = intent.getStringExtra(GcmHelper.NOTIFICATION_FROM);
         // global notification - should probably launch a url
-        if (from.startsWith("/topics/global")) {
-            Toast.makeText(this, "Global Notification", Toast.LENGTH_LONG).show();
+        if (from.startsWith(FeedsFragment.FEED_TOPICS_GLOBAL)) {
+            handleNotificationGlobal(intent);
             return;
         }
         // feed notification
         setFeedsFragment(from);
+    }
+
+    private void handleNotificationGlobal(Intent intent) {
+        Bundle data = intent.getExtras().getParcelable(GcmHelper.NOTIFICATION_DATA);
+        String message = data.getString(FeedsFragment.NOTIFICATION_DATA_MESSAGE);
+        String url = data.getString(FeedsFragment.NOTIFICATION_DATA_URL);
+        if (url != null) {
+            Intent browseIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+            startActivity(browseIntent);
+        }
     }
 
     @Override

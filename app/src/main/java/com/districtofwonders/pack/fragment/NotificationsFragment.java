@@ -28,7 +28,7 @@ public class NotificationsFragment extends Fragment {
     private static final String PREF_RECEIVE_NOTIFICATIONS = "PREF_RECEIVE_NOTIFICATIONS";
     // this is the "to:" value used by the server to generate a notification
     private static String[] topics = {
-            "/topics/global",
+            FeedsFragment.FEED_TOPICS_GLOBAL, // global
             FeedsFragment.feeds[0].topic, // sss
             FeedsFragment.feeds[1].topic, // fff
             FeedsFragment.feeds[2].topic, // ttt

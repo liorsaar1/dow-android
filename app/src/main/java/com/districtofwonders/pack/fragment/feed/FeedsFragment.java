@@ -24,6 +24,7 @@ import java.util.List;
 public class FeedsFragment extends Fragment {
 
     public static final String NOTIFICATION_DATA_MESSAGE = "message";
+    public static final String NOTIFICATION_DATA_URL = "url";
 
     public static final FeedDesc[] feeds = {
             new FeedDesc() {{
@@ -42,8 +43,8 @@ public class FeedsFragment extends Fragment {
                 url = "http://talestoterrify.com/feed/";
             }}
     };
+    public static final String FEED_TOPICS_GLOBAL = "/topics/global";
     private static final String ARG_TOPIC = "topic";
-
     private TabLayout mTabLayout;
     private ViewPager mPager;
     private FeedsPagerAdapter mAdapter;
@@ -67,14 +68,21 @@ public class FeedsFragment extends Fragment {
      */
     public static Notification getNotification(Context context, PendingIntent pendingIntent, String from, Bundle data) {
         Uri defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
-        int feedIndex = FeedDesc.getFeedIndex(feeds, from);
-        String contentTitle = feeds[feedIndex].title;
+
+        String contentTitle;
+        if (from.startsWith(FEED_TOPICS_GLOBAL)) {
+            contentTitle = "District of Wonders";
+        } else {
+            int feedIndex = FeedDesc.getFeedIndex(feeds, from);
+            contentTitle = feeds[feedIndex].title;
+        }
 
         String message = data.getString(NOTIFICATION_DATA_MESSAGE);
         NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(context)
                 .setSmallIcon(R.mipmap.ic_launcher)
                 .setContentTitle(contentTitle)
                 .setContentText(message)
+                .setExtras(data)
                 .setAutoCancel(true)
                 .setSound(defaultSoundUri)
                 .setContentIntent(pendingIntent);
