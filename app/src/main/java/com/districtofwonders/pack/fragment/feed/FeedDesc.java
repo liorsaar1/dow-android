@@ -5,7 +5,7 @@ public class FeedDesc {
     public String url;
     public String topic;
 
-    public static int getTopic(FeedDesc[] feeds, String topic) {
+    public static int getFeedIndex(FeedDesc[] feeds, String topic) {
         for (int i = 0; i < feeds.length; i++) {
             if (feeds[i].topic.equals(topic))
                 return i;

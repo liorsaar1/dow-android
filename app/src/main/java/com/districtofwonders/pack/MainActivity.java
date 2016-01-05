@@ -74,6 +74,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         // gcm notifications handler
         initGcmHelper(this);
+
+        // check if invoked from notification
+        String from = getIntent().getStringExtra(GcmHelper.NOTIFICATION_FROM);
+        if (from != null) {
+            onNewIntentNotification(getIntent());
+        }
     }
 
     private void initGcmHelper(final Activity activity) {
@@ -205,9 +211,15 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         Log.e(TAG, "onNewIntent: from:" + from);
         // assert
         if (from == null) {
-            Toast.makeText(this, "Malformed Notification", Toast.LENGTH_LONG).show();
+            ViewUtils.showError(this, "Malformed Notification");
             return;
         }
+        // 'from' exists - handle notification
+        onNewIntentNotification(intent);
+    }
+
+    private void onNewIntentNotification(Intent intent) {
+        String from = intent.getStringExtra(GcmHelper.NOTIFICATION_FROM);
         // global notification - should probably launch a url
         if (from.startsWith("/topics/global")) {
             Toast.makeText(this, "Global Notification", Toast.LENGTH_LONG).show();

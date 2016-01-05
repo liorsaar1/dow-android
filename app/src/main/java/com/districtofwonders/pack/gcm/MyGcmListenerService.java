@@ -16,17 +16,14 @@
 
 package com.districtofwonders.pack.gcm;
 
+import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
-import android.media.RingtoneManager;
-import android.net.Uri;
 import android.os.Bundle;
-import android.support.v4.app.NotificationCompat;
-import android.util.Log;
 
-import com.districtofwonders.pack.R;
+import com.districtofwonders.pack.fragment.feed.FeedsFragment;
 import com.google.android.gms.gcm.GcmListenerService;
 
 public class MyGcmListenerService extends GcmListenerService {
@@ -43,10 +40,6 @@ public class MyGcmListenerService extends GcmListenerService {
     // [START receive_message]
     @Override
     public void onMessageReceived(String from, Bundle data) {
-        String message = data.getString(GcmHelper.NOTIFICATION_DATA_MESSAGE);
-        Log.d(TAG, "From: " + from);
-        Log.d(TAG, "Message: " + message);
-
         if (from.startsWith("/topics/")) {
             // message received from some topic.
         } else {
@@ -73,26 +66,18 @@ public class MyGcmListenerService extends GcmListenerService {
     /**
      * Create and show a simple notification containing the received GCM message.
      *
-     * @param from
+     * @param from GCM from
      * @param data GCM data bundle
      */
     private void sendNotification(String from, Bundle data) {
+        // create pending intent to launch the parent
         Intent targetActivityIntent = GcmHelper.getParentActivityIntent(this, from, data);
         int requestCode = from.hashCode();
         PendingIntent pendingIntent = PendingIntent.getActivity(this, requestCode++, targetActivityIntent, PendingIntent.FLAG_ONE_SHOT);
-
-        Uri defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
-        String message = data.getString(GcmHelper.NOTIFICATION_DATA_MESSAGE);
-        NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this)
-                .setSmallIcon(R.mipmap.ic_launcher)
-                .setContentTitle("District of Wonders")
-                .setContentText(from + ":" + message)
-                .setAutoCancel(true)
-                .setSound(defaultSoundUri)
-                .setContentIntent(pendingIntent);
-
+        // create notification with the data and pending intent
         NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         int notificationId = requestCode;
-        notificationManager.notify(notificationId, notificationBuilder.build());
+        Notification notification = FeedsFragment.getNotification(this, pendingIntent, from, data);
+        notificationManager.notify(notificationId, notification);
     }
 }

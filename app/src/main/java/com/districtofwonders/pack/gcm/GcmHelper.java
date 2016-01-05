@@ -27,7 +27,6 @@ import java.util.Map;
 public class GcmHelper {
     public static final String NOTIFICATION_FROM = "NOTIFICATION_FROM";
     public static final String NOTIFICATION_DATA = "NOTIFICATION_DATA";
-    public static final String NOTIFICATION_DATA_MESSAGE = "message";
 
     private static final String TAG = GcmHelper.class.getSimpleName();
     private static final int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;

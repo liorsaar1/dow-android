@@ -1,10 +1,16 @@
 package com.districtofwonders.pack.fragment.feed;
 
+import android.app.Notification;
+import android.app.PendingIntent;
+import android.content.Context;
+import android.media.RingtoneManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
+import android.support.v4.app.NotificationCompat;
 import android.support.v4.view.ViewPager;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -17,10 +23,24 @@ import java.util.List;
 
 public class FeedsFragment extends Fragment {
 
+    public static final String NOTIFICATION_DATA_MESSAGE = "message";
+
     public static final FeedDesc[] feeds = {
-            new FeedDesc() {{ title = "StarShipSofa";       topic = "/topics/sss"; url = "http://www.starshipsofa.com/feed/"; }},
-            new FeedDesc() {{ title = "Far Fetched Fables"; topic = "/topics/fff"; url = "http://farfetchedfables.com/feed/"; }},
-            new FeedDesc() {{ title = "Tales to Terrify";   topic = "/topics/ttt"; url = "http://talestoterrify.com/feed/"; }}
+            new FeedDesc() {{
+                title = "StarShipSofa";
+                topic = "/topics/sss";
+                url = "http://www.starshipsofa.com/feed/";
+            }},
+            new FeedDesc() {{
+                title = "Far Fetched Fables";
+                topic = "/topics/fff";
+                url = "http://farfetchedfables.com/feed/";
+            }},
+            new FeedDesc() {{
+                title = "Tales to Terrify";
+                topic = "/topics/ttt";
+                url = "http://talestoterrify.com/feed/";
+            }}
     };
     private static final String ARG_TOPIC = "topic";
 
@@ -34,6 +54,31 @@ public class FeedsFragment extends Fragment {
         arguments.putString(ARG_TOPIC, topic);
         feedsFragment.setArguments(arguments);
         return feedsFragment;
+    }
+
+    /**
+     * create a notification with feed name and message, that will launch the right feed
+     *
+     * @param context       context
+     * @param pendingIntent the class to be launched by the notification
+     * @param from          incoming 'from' field (topic)
+     * @param data          incoming json bundle
+     * @return notification
+     */
+    public static Notification getNotification(Context context, PendingIntent pendingIntent, String from, Bundle data) {
+        Uri defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+        int feedIndex = FeedDesc.getFeedIndex(feeds, from);
+        String contentTitle = feeds[feedIndex].title;
+
+        String message = data.getString(NOTIFICATION_DATA_MESSAGE);
+        NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(context)
+                .setSmallIcon(R.mipmap.ic_launcher)
+                .setContentTitle(contentTitle)
+                .setContentText(message)
+                .setAutoCancel(true)
+                .setSound(defaultSoundUri)
+                .setContentIntent(pendingIntent);
+        return notificationBuilder.build();
     }
 
     @Override
@@ -61,7 +106,7 @@ public class FeedsFragment extends Fragment {
     }
 
     public void setFeed(String topic) {
-        int pageNumber = FeedDesc.getTopic(feeds, topic);
+        int pageNumber = FeedDesc.getFeedIndex(feeds, topic);
         mPager.setCurrentItem(pageNumber);
     }
 }

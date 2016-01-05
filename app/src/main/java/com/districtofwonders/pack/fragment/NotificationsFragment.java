@@ -129,6 +129,7 @@ public class NotificationsFragment extends Fragment {
 
     private void onCheckedReceive(final boolean isChecked) {
         Log.e(TAG, "receive:" + isChecked);
+        setReceiveNotificationsPref(getActivity(), isChecked);
 
         final ProgressDialog progressDialog = ProgressDialog.show(getActivity(), getActivity().getString(R.string.notifications_updating_preferences), getActivity().getString(R.string.please_wait), true);
 
@@ -136,7 +137,6 @@ public class NotificationsFragment extends Fragment {
             @Override
             public void success() {
                 progressDialog.dismiss();
-                setReceiveNotificationsPref(getActivity(), isChecked);
             }
 
             @Override
