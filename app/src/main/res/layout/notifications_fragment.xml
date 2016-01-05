@@ -6,25 +6,61 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-    <Switch
-        android:id="@+id/notificationsReceive"
-        android:text="Receive Notifications"
-        style="@style/notificationSwitch"/>
-    <Switch
-        android:id="@+id/notificationsSSS"
-        android:text="StarShipSofa"
-        style="@style/notificationSwitch"/>
-    <Switch
-        android:id="@+id/notificationsFFF"
-        android:text="Far Fetched Fables"
-        style="@style/notificationSwitch"/>
-    <Switch
-        android:id="@+id/notificationsTTT"
-        android:text="Tales To Terrify"
-        style="@style/notificationSwitch"/>
-    <Switch
-        android:id="@+id/notificationsGlobal"
-        android:text="DOW news"
-        style="@style/notificationSwitch"/>
+    <LinearLayout
+        android:id="@+id/notificationsErrorContainer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
 
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_margin="20dip"
+            android:gravity="center_horizontal"
+            android:text="@string/notifications_disabled_restart"
+            android:textSize="18sp"/>
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/notificationsUiContainer"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <Switch
+            android:id="@+id/notificationsReceive"
+            style="@style/notificationSwitch"
+            android:text="Receive Notifications"/>
+
+        <LinearLayout
+            android:id="@+id/notificationsTopicsContainer"
+            android:layout_width="match_parent"
+            android:background="@drawable/rounded_background"
+            android:layout_height="wrap_content"
+            android:layout_margin="20dip"
+            android:orientation="vertical">
+
+            <Switch
+                android:id="@+id/notificationsSSS"
+                style="@style/notificationSwitch"
+                android:text="StarShipSofa"/>
+
+            <Switch
+                android:id="@+id/notificationsFFF"
+                style="@style/notificationSwitch"
+                android:text="Far Fetched Fables"/>
+
+            <Switch
+                android:id="@+id/notificationsTTT"
+                style="@style/notificationSwitch"
+                android:text="Tales To Terrify"/>
+
+            <Switch
+                android:id="@+id/notificationsGlobal"
+                style="@style/notificationSwitch"
+                android:text="DOW news"/>
+
+        </LinearLayout>
+    </LinearLayout>
 </LinearLayout>

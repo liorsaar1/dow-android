@@ -4,6 +4,8 @@ package com.districtofwonders.pack;
  * Date 15/06/15
  */
 
+import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
@@ -25,6 +27,7 @@ import android.widget.Toast;
 import com.districtofwonders.pack.fragment.NotificationsFragment;
 import com.districtofwonders.pack.fragment.feed.FeedsFragment;
 import com.districtofwonders.pack.gcm.GcmHelper;
+import com.districtofwonders.pack.util.ViewUtils;
 
 import java.util.Map;
 
@@ -70,17 +73,27 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         navigate(mSelectedId);
 
         // gcm notifications handler
+        initGcmHelper(this);
+    }
+
+    private void initGcmHelper(final Activity activity) {
+        // topics map from prefs
         Map<String, Boolean> topicsMap = NotificationsFragment.getTopicsMap(this);
-        gcmHelper = new GcmHelper(this, topicsMap, new GcmHelper.RegistrationListener() {
+        // progress
+        final ProgressDialog progressDialog = ProgressDialog.show(activity, "Contacting Notification Server", "Please Wait...", true);
+        // start the background service
+        gcmHelper = new GcmHelper(activity, topicsMap, new GcmHelper.RegistrationListener() {
 
             @Override
             public void success() {
+                progressDialog.dismiss();
             }
 
             @Override
             public void error(String error) {
+                progressDialog.dismiss();
                 Log.e(TAG, "RegistrationListener:" + error);
-                Toast.makeText(MainActivity.this, "Error while connecting to the notification server: " + error, Toast.LENGTH_LONG).show();
+                ViewUtils.showError(activity, error + "\n\n" + getString(R.string.notifications_disabled_restart));
             }
         });
     }

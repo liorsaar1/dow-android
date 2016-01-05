@@ -21,5 +21,8 @@
     <string name="gcm_token_error_message">An error occurred while either fetching the InstanceID token,
         sending the fetched token to the server or subscribing to the PubSub topic. Please try
         running the sample again.</string>
+    <string name="notifications_updating_preferences">Updating Preferences</string>
+    <string name="please_wait">Please Wait...</string>
+    <string name="notifications_disabled_restart">Notifications Server Unreachable.\nPlease restart the app.</string>
 
 </resources>

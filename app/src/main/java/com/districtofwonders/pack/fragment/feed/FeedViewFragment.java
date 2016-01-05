@@ -144,8 +144,10 @@ public class FeedViewFragment extends Fragment {
                     public void onResponse(String response) {
                         try {
                             setData(response);
+                            mSwipeRefreshLayout.setRefreshing(false);
                         } catch (Exception e) {
                             setError(e.getMessage()); // parse error
+                            mSwipeRefreshLayout.setRefreshing(false);
                         }
                     }
                 },
@@ -158,8 +160,9 @@ public class FeedViewFragment extends Fragment {
         DowSingleton.getInstance(getActivity()).addToRequestQueue(stringRequest);
     }
 
-    private void setError(VolleyError error) {
-        String message = "Server Error " + error.networkResponse.statusCode;
+    private void setError(VolleyError volleyError) {
+        String statusCode = (volleyError.networkResponse != null) ? ""+volleyError.networkResponse.statusCode : "";
+        String message = "Server Error " + statusCode;
         setError(message);
     }
 
@@ -179,7 +182,6 @@ public class FeedViewFragment extends Fragment {
         FeedParser parser = new FeedParser(xmlString);
         mList = parser.getItems();
         mFeedRecyclerAdapter.setData(mList);
-        mSwipeRefreshLayout.setRefreshing(false);
     }
 
     private void clearData() {

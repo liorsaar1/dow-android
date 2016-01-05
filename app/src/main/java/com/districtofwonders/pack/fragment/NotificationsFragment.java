@@ -6,7 +6,6 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
-import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -17,6 +16,8 @@ import android.widget.Switch;
 import com.districtofwonders.pack.R;
 import com.districtofwonders.pack.fragment.feed.FeedsFragment;
 import com.districtofwonders.pack.gcm.GcmHelper;
+import com.districtofwonders.pack.gcm.GcmPreferences;
+import com.districtofwonders.pack.util.ViewUtils;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -25,12 +26,6 @@ public class NotificationsFragment extends Fragment {
 
     private static final String TAG = NotificationsFragment.class.getSimpleName();
     private static final String PREF_RECEIVE_NOTIFICATIONS = "PREF_RECEIVE_NOTIFICATIONS";
-
-    private Switch globalSwitch;
-    private Switch sssSwitch;
-    private Switch fffSwitch;
-    private Switch tttSwitch;
-
     // this is the "to:" value used by the server to generate a notification
     private static String[] topics = {
             "/topics/global",
@@ -38,6 +33,9 @@ public class NotificationsFragment extends Fragment {
             FeedsFragment.feeds[1].topic, // fff
             FeedsFragment.feeds[2].topic, // ttt
     };
+    private View errorContainer;
+    private View uiContainer;
+    private View topicsContainer;
 
     public static Fragment newInstance(Context context) {
         NotificationsFragment fragment = new NotificationsFragment();
@@ -48,7 +46,19 @@ public class NotificationsFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         ViewGroup root = (ViewGroup) inflater.inflate(R.layout.notifications_fragment, null);
 
+        errorContainer = root.findViewById(R.id.notificationsErrorContainer);
+        uiContainer = root.findViewById(R.id.notificationsUiContainer);
+        boolean isEnabled = isNotificationsEnabled(getActivity());
+        setEnabled(isEnabled);
+        // if connection to GCM failed - disable UI
+        if (!isEnabled) {
+            return root;
+        }
+
+        // receive
         boolean isReceive = getReceiveNotificationsPref(getActivity());
+        topicsContainer = root.findViewById(R.id.notificationsTopicsContainer);
+        setReceiving(isReceive);
         Switch receiveSwitch = (Switch) root.findViewById(R.id.notificationsReceive);
         receiveSwitch.setChecked(isReceive);
         receiveSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
@@ -60,7 +70,7 @@ public class NotificationsFragment extends Fragment {
         // get topics prefs
         Map<String, Boolean> topicsMap = getTopicsMap(getActivity());
         // set switches
-        globalSwitch = (Switch) root.findViewById(R.id.notificationsGlobal);
+        Switch globalSwitch = (Switch) root.findViewById(R.id.notificationsGlobal);
         globalSwitch.setChecked(topicsMap.get(topics[0]));
         globalSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
@@ -68,7 +78,7 @@ public class NotificationsFragment extends Fragment {
                 onCheckedTopic(topics[0], isChecked);
             }
         });
-        sssSwitch = (Switch) root.findViewById(R.id.notificationsSSS);
+        Switch sssSwitch = (Switch) root.findViewById(R.id.notificationsSSS);
         sssSwitch.setChecked(topicsMap.get(topics[1]));
         sssSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
@@ -76,7 +86,7 @@ public class NotificationsFragment extends Fragment {
                 onCheckedTopic(topics[1], isChecked);
             }
         });
-        fffSwitch = (Switch) root.findViewById(R.id.notificationsFFF);
+        Switch fffSwitch = (Switch) root.findViewById(R.id.notificationsFFF);
         fffSwitch.setChecked(topicsMap.get(topics[2]));
         fffSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
@@ -84,7 +94,7 @@ public class NotificationsFragment extends Fragment {
                 onCheckedTopic(topics[2], isChecked);
             }
         });
-        tttSwitch = (Switch) root.findViewById(R.id.notificationsTTT);
+        Switch tttSwitch = (Switch) root.findViewById(R.id.notificationsTTT);
         tttSwitch.setChecked(topicsMap.get(topics[3]));
         tttSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
@@ -93,27 +103,49 @@ public class NotificationsFragment extends Fragment {
             }
         });
 
-        setEnabled(isReceive);
+        setReceiving(isReceive);
         return root;
     }
 
-    private void setEnabled(boolean isReceive) {
-        // disable the switches
-        globalSwitch.setClickable(isReceive);
-        sssSwitch.setClickable(isReceive);
-        fffSwitch.setClickable(isReceive);
-        tttSwitch.setClickable(isReceive);
-        // grey out the ui
-        float alpha = isReceive ? 1.0f : 0.3f;
-        globalSwitch.setAlpha(alpha);
-        sssSwitch.setAlpha(alpha);
-        fffSwitch.setAlpha(alpha);
-        tttSwitch.setAlpha(alpha);
+    private void setEnabled(boolean isEnabled) {
+        if (isEnabled) {
+            errorContainer.setVisibility(View.GONE);
+            uiContainer.setVisibility(View.VISIBLE);
+        } else {
+            errorContainer.setVisibility(View.VISIBLE);
+            uiContainer.setVisibility(View.GONE);
+        }
+    }
+
+    public static boolean isNotificationsEnabled(Context context) {
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+        return sharedPreferences.getString(GcmPreferences.REGISTRATION_ERROR, null) == null;
     }
 
     public static boolean getReceiveNotificationsPref(Context context) {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
         return sharedPreferences.getBoolean(PREF_RECEIVE_NOTIFICATIONS, true);
+    }
+
+    private void onCheckedReceive(final boolean isChecked) {
+        Log.e(TAG, "receive:" + isChecked);
+
+        final ProgressDialog progressDialog = ProgressDialog.show(getActivity(), getActivity().getString(R.string.notifications_updating_preferences), getActivity().getString(R.string.please_wait), true);
+
+        GcmHelper.setSubscriptions(getActivity(), getTopicsMap(getActivity()), new GcmHelper.RegistrationListener() {
+            @Override
+            public void success() {
+                progressDialog.dismiss();
+                setReceiveNotificationsPref(getActivity(), isChecked);
+            }
+
+            @Override
+            public void error(String error) {
+                progressDialog.dismiss();
+                setEnabled(false);
+                ViewUtils.showError(getActivity(), error);
+            }
+        });
     }
 
     public static Map<String, Boolean> getTopicsMap(Context context) {
@@ -132,60 +164,37 @@ public class NotificationsFragment extends Fragment {
         return topicsMap;
     }
 
-    private void onCheckedReceive(boolean isChecked) {
-        Log.e(TAG, "receive:" + isChecked);
-        setReceiveNotificationsPref(getActivity(), isChecked);
-
-        final ProgressDialog progressDialog = ProgressDialog.show(getActivity(), "Updating Preference", "Please Wait...", true);
-
-        GcmHelper.setSubscriptions(getActivity(), getTopicsMap(getActivity()), new GcmHelper.RegistrationListener() {
-            @Override
-            public void success() {
-                progressDialog.dismiss();
-            }
-
-            @Override
-            public void error(String error) {
-                progressDialog.dismiss();
-                showSubscriptionError(error);
-            }
-        });
-    }
-
     public void setReceiveNotificationsPref(Context context, boolean value) {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
         sharedPreferences.edit().putBoolean(PREF_RECEIVE_NOTIFICATIONS, value).apply();
 
-        setEnabled(value);
+        setReceiving(value);
     }
 
-    private void onCheckedTopic(String topicName, boolean isChecked) {
-        Log.e(TAG, "receive:" + isChecked);
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
-        sharedPreferences.edit().putBoolean(topicName, isChecked).apply();
+    private void setReceiving(boolean isReceive) {
+        topicsContainer.setVisibility(isReceive?View.VISIBLE:View.GONE);
+    }
 
-        final ProgressDialog progressDialog = ProgressDialog.show(getActivity(), "Updating Preference", "Please Wait...", true);
+    private void onCheckedTopic(final String topicName, final boolean isChecked) {
+        Log.e(TAG, "receive:" + isChecked);
+
+        final ProgressDialog progressDialog = ProgressDialog.show(getActivity(), getActivity().getString(R.string.notifications_updating_preferences), getActivity().getString(R.string.please_wait), true);
 
         GcmHelper.setSubscription(getActivity(), topicName, isChecked, new GcmHelper.RegistrationListener() {
             @Override
             public void success() {
                 progressDialog.dismiss();
+                // write the pref only after subscription success
+                SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
+                sharedPreferences.edit().putBoolean(topicName, isChecked).apply();
             }
 
             @Override
             public void error(String error) {
                 progressDialog.dismiss();
-                showSubscriptionError(error);
+                setEnabled(false);
+                ViewUtils.showError(getActivity(), error);
             }
         });
-    }
-
-    private void showSubscriptionError(String error) {
-        new AlertDialog.Builder(getActivity())
-                .setTitle("Error")
-                .setMessage(error)
-                .setPositiveButton(android.R.string.ok, null)
-                .setIcon(android.R.drawable.ic_dialog_alert)
-                .show();
     }
 }

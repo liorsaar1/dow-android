@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
+import android.support.v7.app.AlertDialog;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
@@ -30,6 +31,7 @@ public class ViewUtils {
     /**
      * when including a listview in a scrollview, the list cant compute a height of wrap_content properly
      * this function adjusts the height of a list to the total height of its members
+     *
      * @param listView
      */
     public static void setListViewFullHeight(ListView listView) {
@@ -134,7 +136,7 @@ public class ViewUtils {
         ViewGroup slidingTabStrip = (ViewGroup) tabLayout.getChildAt(0);
         int childCount = slidingTabStrip.getChildCount();
         for (int i = 0; i < childCount; i++) {
-            ViewGroup tabView = (ViewGroup)slidingTabStrip.getChildAt(i);
+            ViewGroup tabView = (ViewGroup) slidingTabStrip.getChildAt(i);
             TextView textView = (TextView) tabView.getChildAt(0);
             textView.setAllCaps(false);
         }
@@ -179,4 +181,16 @@ public class ViewUtils {
 //        TextView tvEmpty = (TextView) view.findViewById(R.id.tv_empty);
 //        tvEmpty.setText("No " + title);
 //    }
+
+
+    public static void showError(Context context, String error) {
+        new AlertDialog.Builder(context)
+                .setTitle("Error")
+                .setMessage(error)
+                .setPositiveButton(android.R.string.ok, null)
+                .setIcon(android.R.drawable.ic_dialog_alert)
+                .setIconAttribute(android.R.attr.alertDialogIcon)
+                .show();
+    }
+
 }
