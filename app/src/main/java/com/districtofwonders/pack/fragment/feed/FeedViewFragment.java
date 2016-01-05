@@ -131,12 +131,12 @@ public class FeedViewFragment extends Fragment {
         String url = FeedsFragment.feeds[mPageNumber].url;
 
         // setup ui
-        new Handler().postDelayed(new Runnable() {
+        new Handler().post(new Runnable() {
             @Override
             public void run() {
                 mSwipeRefreshLayout.setRefreshing(true);
             }
-        }, 100);
+        });
 
         StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
                 new Response.Listener<String>() {

@@ -40,8 +40,20 @@ public class GcmTestActivity extends AppCompatActivity {
     private GcmHelper gcmHelper;
     private Map<String, Boolean> topicsMap = new HashMap<String, Boolean>() {
         {
-            put("global", true);
-            put("feed", false);
+            put("/topics/global", true);
+            put("/topics/sss", false);
+        }
+    };
+
+    private GcmHelper.RegistrationListener mRegistrationListener = new GcmHelper.RegistrationListener() {
+        @Override
+        public void success() {
+            Toast.makeText(GcmTestActivity.this, "OKOKOKOK", Toast.LENGTH_LONG).show();
+        }
+
+        @Override
+        public void error(String error) {
+            Toast.makeText(GcmTestActivity.this, "ERROR:" + error, Toast.LENGTH_LONG).show();
         }
     };
 
@@ -58,16 +70,16 @@ public class GcmTestActivity extends AppCompatActivity {
         mSub.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                topicsMap.put("feed", true);
-                gcmHelper.setSubscriptions(GcmTestActivity.this, topicsMap);
+                topicsMap.put("/topics/sss", true);
+                gcmHelper.setSubscriptions(GcmTestActivity.this, topicsMap, mRegistrationListener);
             }
         });
         Button mUnsub = (Button) findViewById(R.id.gcmUnsubscribe);
         mUnsub.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                topicsMap.put("feed", false);
-                gcmHelper.setSubscriptions(GcmTestActivity.this, topicsMap);
+                topicsMap.put("/topics/sss", false);
+                gcmHelper.setSubscriptions(GcmTestActivity.this, topicsMap, mRegistrationListener);
             }
         });
 

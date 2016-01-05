@@ -12,7 +12,6 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
-import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
@@ -33,12 +32,10 @@ public class GcmHelper {
     private static final int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;
     private static Class<? extends Activity> sParentActivityClass = GcmTestActivity.class;
     private final BroadcastReceiver mRegistrationBroadcastReceiver;
-    private final RegistrationListener mRegistrationListener;
     private static String mToken;
 
-    public GcmHelper(final Activity parentActivity, final Map<String, Boolean> topicsMap, RegistrationListener registrationListener) {
+    public GcmHelper(final Activity parentActivity, final Map<String, Boolean> topicsMap, final RegistrationListener registrationListener) {
         sParentActivityClass = parentActivity.getClass();
-        mRegistrationListener = registrationListener;
         mRegistrationBroadcastReceiver = new BroadcastReceiver() {
 
             @Override
@@ -48,13 +45,12 @@ public class GcmHelper {
                 // error - no token
                 if (token == null) {
                     String error = sharedPreferences.getString(GcmPreferences.REGISTRATION_ERROR, null);
-                    mRegistrationListener.error(error);
+                    registrationListener.error(error);
                     return;
                 }
                 // success
                 mToken = token;
-                setSubscriptions(parentActivity, topicsMap);
-                mRegistrationListener.success();
+                setSubscriptions(parentActivity, topicsMap, registrationListener);
             }
         };
 
@@ -85,7 +81,7 @@ public class GcmHelper {
         return true;
     }
 
-    public static void setSubscriptions(final Activity activity, final Map<String, Boolean> topicsMap) {
+    public static void setSubscriptions(final Activity activity, final Map<String, Boolean> topicsMap, final RegistrationListener registrationListener) {
         new AsyncTask<Object, Void, Throwable>() {
             @Override
             protected Throwable doInBackground(Object... params) {
@@ -110,17 +106,17 @@ public class GcmHelper {
             @Override
             protected void onPostExecute(Throwable t) {
                 if (t != null) {
-                    Toast.makeText(activity, "ERROR:" + t.getMessage(), Toast.LENGTH_LONG).show();
+                    registrationListener.error(t.getMessage());
                     return;
                 }
-                Toast.makeText(activity, "Subscriptions Updated.", Toast.LENGTH_LONG).show();
+                registrationListener.success();
             }
         }.execute();
     }
 
-    public static void setSubscription(final Activity activity, final String topic, final boolean value) {
-        Map<String, Boolean> topicsMap = new HashMap() {{ put(topic, value); }};
-        setSubscriptions(activity, topicsMap);
+    public static void setSubscription(final Activity activity, final String topic, final boolean value, final RegistrationListener registrationListener) {
+        Map<String, Boolean> topicsMap = new HashMap<String, Boolean>() {{ put(topic, value); }};
+        setSubscriptions(activity, topicsMap, registrationListener);
     }
 
     public static Intent getParentActivityIntent(Context context, String from, Bundle data) {
