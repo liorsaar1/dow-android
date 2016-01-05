@@ -33,9 +33,20 @@ public class DateUtils {
     public static int getMinutes(String durationString) {
         String[] parts = durationString.split(":");
         try {
-            return Integer.parseInt(parts[0]) * 60 + Integer.parseInt(parts[1]);
+            switch (parts.length) {
+                // less than 1 minute
+                case 1:
+                    return 1;
+                // mm:ss
+                case 2:
+                    return Integer.parseInt(parts[0]);
+                // hh:mm:ss
+                case 3:
+                    return Integer.parseInt(parts[0]) * 60 + Integer.parseInt(parts[1]);
+            }
         } catch (Throwable t) {
             throw new IllegalArgumentException("Illegal duration format" + durationString);
         }
+        throw new IllegalArgumentException("Illegal duration format" + durationString);
     }
 }

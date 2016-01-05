@@ -77,22 +77,22 @@ public class MyGcmListenerService extends GcmListenerService {
      * @param data GCM data bundle
      */
     private void sendNotification(String from, Bundle data) {
-        int requestCode = 0;
         Intent targetActivityIntent = GcmHelper.getParentActivityIntent(this, from, data);
-        PendingIntent pendingIntent = PendingIntent.getActivity(this, requestCode, targetActivityIntent, PendingIntent.FLAG_ONE_SHOT);
+        int requestCode = from.hashCode();
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, requestCode++, targetActivityIntent, PendingIntent.FLAG_ONE_SHOT);
 
         Uri defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
         String message = data.getString(GcmHelper.NOTIFICATION_DATA_MESSAGE);
         NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this)
                 .setSmallIcon(R.mipmap.ic_launcher)
                 .setContentTitle("District of Wonders")
-                .setContentText(message)
+                .setContentText(from + ":" + message)
                 .setAutoCancel(true)
                 .setSound(defaultSoundUri)
                 .setContentIntent(pendingIntent);
 
         NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-        int notificationId = 0;
+        int notificationId = requestCode;
         notificationManager.notify(notificationId, notificationBuilder.build());
     }
 }

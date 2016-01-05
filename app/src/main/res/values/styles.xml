@@ -18,4 +18,12 @@
         <item name="textAllCaps">false</item>
     </style>
 
+    <style name="notificationSwitch">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_margin">20dp</item>
+        <item name="android:textSize">18sp</item>
+        <item name="android:textColor">@color/colorTextSecondary</item>
+    </style>
+
 </resources>

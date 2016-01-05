@@ -36,7 +36,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private static final String TAG = MainActivity.class.getSimpleName();
     final String[] fragments = {
             "com.districtofwonders.pack.fragment.feed.FeedsFragment",
-            "com.districtofwonders.pack.fragment.AboutFragment"};
+            "com.districtofwonders.pack.fragment.AboutFragment",
+            "com.districtofwonders.pack.fragment.NotificationsFragment"};
     private DrawerLayout mDrawerLayout;
     private ActionBarDrawerToggle mDrawerToggle;
     private int mSelectedId;
@@ -69,7 +70,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         navigate(mSelectedId);
 
         // gcm notifications handler
-        Map<String, Boolean> topicsMap = NotificationsFragment.getTopicsMap();
+        Map<String, Boolean> topicsMap = NotificationsFragment.getTopicsMap(this);
         gcmHelper = new GcmHelper(this, topicsMap, new GcmHelper.RegistrationListener() {
 
             @Override
@@ -111,6 +112,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
         if (mSelectedId == R.id.drawer_nav_about) {
             setFragment(1);
+        }
+        if (mSelectedId == R.id.drawer_nav_notifications) {
+            setFragment(2);
         }
     }
 

@@ -1,0 +1,30 @@
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <Switch
+        android:id="@+id/notificationsReceive"
+        android:text="Receive Notifications"
+        style="@style/notificationSwitch"/>
+    <Switch
+        android:id="@+id/notificationsSSS"
+        android:text="StarShipSofa"
+        style="@style/notificationSwitch"/>
+    <Switch
+        android:id="@+id/notificationsFFF"
+        android:text="Far Fetched Fables"
+        style="@style/notificationSwitch"/>
+    <Switch
+        android:id="@+id/notificationsTTT"
+        android:text="Tales To Terrify"
+        style="@style/notificationSwitch"/>
+    <Switch
+        android:id="@+id/notificationsGlobal"
+        android:text="DOW news"
+        style="@style/notificationSwitch"/>
+
+</LinearLayout>

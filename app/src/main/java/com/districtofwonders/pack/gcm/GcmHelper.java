@@ -18,6 +18,7 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.gcm.GcmPubSub;
 
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -33,7 +34,7 @@ public class GcmHelper {
     private static Class<? extends Activity> sParentActivityClass = GcmTestActivity.class;
     private final BroadcastReceiver mRegistrationBroadcastReceiver;
     private final RegistrationListener mRegistrationListener;
-    private String mToken;
+    private static String mToken;
 
     public GcmHelper(final Activity parentActivity, final Map<String, Boolean> topicsMap, RegistrationListener registrationListener) {
         sParentActivityClass = parentActivity.getClass();
@@ -84,7 +85,7 @@ public class GcmHelper {
         return true;
     }
 
-    public void setSubscriptions(final Activity activity, final Map<String, Boolean> topicsMap) {
+    public static void setSubscriptions(final Activity activity, final Map<String, Boolean> topicsMap) {
         new AsyncTask<Object, Void, Throwable>() {
             @Override
             protected Throwable doInBackground(Object... params) {
@@ -93,10 +94,10 @@ public class GcmHelper {
                     for (String key : topicsMap.keySet()) {
                         Boolean value = topicsMap.get(key);
                         if (value) {
-                            pubSub.subscribe(mToken, "/topics/" + key, null);
+                            pubSub.subscribe(mToken, key, null);
                             Log.e(TAG, "subscribe:" + key);
                         } else {
-                            pubSub.unsubscribe(mToken, "/topics/" + key);
+                            pubSub.unsubscribe(mToken, key);
                             Log.e(TAG, "unsubscribe:" + key);
                         }
                     }
@@ -115,6 +116,11 @@ public class GcmHelper {
                 Toast.makeText(activity, "Subscriptions Updated.", Toast.LENGTH_LONG).show();
             }
         }.execute();
+    }
+
+    public static void setSubscription(final Activity activity, final String topic, final boolean value) {
+        Map<String, Boolean> topicsMap = new HashMap() {{ put(topic, value); }};
+        setSubscriptions(activity, topicsMap);
     }
 
     public static Intent getParentActivityIntent(Context context, String from, Bundle data) {
