@@ -24,5 +24,6 @@
     <string name="notifications_updating_preferences">Updating Preferences</string>
     <string name="please_wait">Please Wait...</string>
     <string name="notifications_disabled_restart">Notifications Server Unreachable.\nPlease restart the app.</string>
+    <string name="dow">District of Wonders</string>
 
 </resources>

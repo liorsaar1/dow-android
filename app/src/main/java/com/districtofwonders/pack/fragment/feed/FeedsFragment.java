@@ -3,6 +3,8 @@ package com.districtofwonders.pack.fragment.feed;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Bundle;
@@ -45,9 +47,7 @@ public class FeedsFragment extends Fragment {
     };
     public static final String FEED_TOPICS_GLOBAL = "/topics/global";
     private static final String ARG_TOPIC = "topic";
-    private TabLayout mTabLayout;
     private ViewPager mPager;
-    private FeedsPagerAdapter mAdapter;
 
     public static Fragment newInstance(String topic) {
         FeedsFragment feedsFragment = new FeedsFragment();
@@ -70,16 +70,23 @@ public class FeedsFragment extends Fragment {
         Uri defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
 
         String contentTitle;
+        Bitmap bitmap;
+        int icon;
         if (from.startsWith(FEED_TOPICS_GLOBAL)) {
-            contentTitle = "District of Wonders";
+            contentTitle = context.getString(R.string.dow);
+            icon = R.mipmap.ic_launcher;
+            bitmap = getNotificationBitmap(context, 3);
         } else {
             int feedIndex = FeedDesc.getFeedIndex(feeds, from);
             contentTitle = feeds[feedIndex].title;
+            icon = feedIcon[feedIndex];
+            bitmap = getNotificationBitmap(context, feedIndex);
         }
 
         String message = data.getString(NOTIFICATION_DATA_MESSAGE);
         NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(context)
-                .setSmallIcon(R.mipmap.ic_launcher)
+                .setSmallIcon(icon)
+                .setLargeIcon(bitmap)
                 .setContentTitle(contentTitle)
                 .setContentText(message)
                 .setExtras(data)
@@ -89,12 +96,27 @@ public class FeedsFragment extends Fragment {
         return notificationBuilder.build();
     }
 
+    // notification display bitmap
+    private static Bitmap getNotificationBitmap(Context context, int feedIndex) {
+        if (feedIconBitmap == null) {
+            feedIconBitmap = new ArrayList<>();
+            for (int iconResId : feedIcon) {
+                Bitmap bitmap = BitmapFactory.decodeResource(context.getResources(), iconResId);
+                feedIconBitmap.add(bitmap);
+            }
+        }
+        return feedIconBitmap.get(feedIndex);
+    }
+
+    private static final int[] feedIcon = { R.drawable.ic_sss, R.drawable.ic_fff, R.drawable.ic_ttt, R.drawable.ic_dow};
+    private static List<Bitmap> feedIconBitmap;
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         ViewGroup root = (ViewGroup) inflater.inflate(R.layout.feed_fragment, null);
 
-        mTabLayout = (TabLayout) root.findViewById(R.id.feed_tab_layout);
-        mAdapter = new FeedsPagerAdapter(getActivity().getSupportFragmentManager());
+        TabLayout mTabLayout = (TabLayout) root.findViewById(R.id.feed_tab_layout);
+        FeedsPagerAdapter mAdapter = new FeedsPagerAdapter(getActivity().getSupportFragmentManager());
         mPager = (ViewPager) root.findViewById(R.id.feed_view_pager);
         mPager.setAdapter(mAdapter);
         mTabLayout.setTabsFromPagerAdapter(mAdapter);
