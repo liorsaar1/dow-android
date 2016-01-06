@@ -37,11 +37,6 @@ public class NotificationsFragment extends Fragment {
     private View uiContainer;
     private View topicsContainer;
 
-    public static Fragment newInstance(Context context) {
-        NotificationsFragment fragment = new NotificationsFragment();
-        return fragment;
-    }
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         ViewGroup root = (ViewGroup) inflater.inflate(R.layout.notifications_fragment, null);
@@ -59,6 +54,8 @@ public class NotificationsFragment extends Fragment {
         boolean isReceive = getReceiveNotificationsPref(getActivity());
         topicsContainer = root.findViewById(R.id.notificationsTopicsContainer);
         setReceiving(isReceive);
+
+        // switches
         Switch receiveSwitch = (Switch) root.findViewById(R.id.notificationsReceive);
         receiveSwitch.setChecked(isReceive);
         receiveSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
@@ -133,7 +130,7 @@ public class NotificationsFragment extends Fragment {
 
         final ProgressDialog progressDialog = ProgressDialog.show(getActivity(), getActivity().getString(R.string.notifications_updating_preferences), getActivity().getString(R.string.please_wait), true);
 
-        GcmHelper.setSubscriptions(getActivity(), getTopicsMap(getActivity()), new GcmHelper.RegistrationListener() {
+        GcmHelper.setSubscriptions(getActivity(), getRegistrationMap(getActivity()), new GcmHelper.RegistrationListener() {
             @Override
             public void success() {
                 progressDialog.dismiss();
@@ -148,17 +145,39 @@ public class NotificationsFragment extends Fragment {
         });
     }
 
+    /**
+     * create the topics map for UI update, regardless of 'receive notifications'
+     * @param context context
+     * @return on/off map by topic
+     */
     public static Map<String, Boolean> getTopicsMap(Context context) {
 
         Map<String, Boolean> topicsMap = new HashMap<>();
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
-        boolean receive = sharedPreferences.getBoolean(PREF_RECEIVE_NOTIFICATIONS, true);
 
         for (String topic : topics) {
-            if (receive)
-                topicsMap.put(topic, sharedPreferences.getBoolean(topic, true));
-            else
-                topicsMap.put(topic, false);
+            topicsMap.put(topic, sharedPreferences.getBoolean(topic, true));
+        }
+
+        return topicsMap;
+    }
+
+    /**
+     * create the topics map that will be sent to the server for registration
+     * when 'receive notifications' is OFF - all topics are OFF
+     * @param context context
+     * @return on/off map by topic
+     */
+    public static Map<String, Boolean> getRegistrationMap(Context context) {
+
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+        // if receiving notifications - return the topics map from prefs
+        boolean isReceive = sharedPreferences.getBoolean(PREF_RECEIVE_NOTIFICATIONS, true);
+        if (isReceive) return getTopicsMap(context);
+        // if not receiving notification - return an all-off
+        Map<String, Boolean> topicsMap = new HashMap<>();
+        for (String topic : topics) {
+            topicsMap.put(topic, false);
         }
 
         return topicsMap;

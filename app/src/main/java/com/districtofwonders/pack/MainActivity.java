@@ -1,7 +1,7 @@
 package com.districtofwonders.pack;
+
 /**
- * Author Vivz
- * Date 15/06/15
+ * Created by liorsaar on 2015-12-16
  */
 
 import android.app.Activity;
@@ -24,11 +24,13 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import com.districtofwonders.pack.fragment.AboutFragment;
 import com.districtofwonders.pack.fragment.NotificationsFragment;
 import com.districtofwonders.pack.fragment.feed.FeedsFragment;
 import com.districtofwonders.pack.gcm.GcmHelper;
 import com.districtofwonders.pack.util.ViewUtils;
 
+import java.util.HashMap;
 import java.util.Map;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
@@ -37,10 +39,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private static final String SELECTED_ITEM_ID = "selected_item_id";
     private static final String FIRST_TIME = "first_time";
     private static final String TAG = MainActivity.class.getSimpleName();
-    final String[] fragments = {
-            "com.districtofwonders.pack.fragment.feed.FeedsFragment",
-            "com.districtofwonders.pack.fragment.AboutFragment",
-            "com.districtofwonders.pack.fragment.NotificationsFragment"};
+    private static Map<Integer, String> fragmentMap;
     private DrawerLayout mDrawerLayout;
     private ActionBarDrawerToggle mDrawerToggle;
     private int mSelectedId;
@@ -51,6 +50,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main_activity);
+        // init fragments
+        initFragments();
+
+        // init navigation
         Toolbar mToolbar = (Toolbar) findViewById(R.id.app_bar);
         setSupportActionBar(mToolbar);
         NavigationView mDrawer = (NavigationView) findViewById(R.id.main_drawer);
@@ -84,7 +87,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     private void initGcmHelper(final Activity activity) {
         // topics map from prefs
-        Map<String, Boolean> topicsMap = NotificationsFragment.getTopicsMap(this);
+        Map<String, Boolean> topicsMap = NotificationsFragment.getRegistrationMap(this);
         // progress
         final ProgressDialog progressDialog = ProgressDialog.show(activity, "Contacting Notification Server", "Please Wait...", true);
         // start the background service
@@ -124,23 +127,24 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         mDrawerLayout.closeDrawer(GravityCompat.START);
     }
 
-    private void navigate(int mSelectedId) {
+    private void navigate(int selectedId) {
         mDrawerLayout.closeDrawer(GravityCompat.START);
-        if (mSelectedId == R.id.drawer_nav_feed) {
-            setFragment(0);
-        }
-        if (mSelectedId == R.id.drawer_nav_about) {
-            setFragment(1);
-        }
-        if (mSelectedId == R.id.drawer_nav_notifications) {
-            setFragment(2);
-        }
+        setFragment(selectedId);
     }
 
-    private void setFragment(int position) {
-        FragmentTransaction tx = getSupportFragmentManager().beginTransaction(); // TODO refactor
-        tx.replace(R.id.main_content, Fragment.instantiate(MainActivity.this, fragments[position]));
+    private void setFragment(int navId) {
+        FragmentTransaction tx = getSupportFragmentManager().beginTransaction();
+        String className = fragmentMap.get(navId);
+        Fragment fragment = Fragment.instantiate(this, className);
+        tx.replace(R.id.main_content, fragment);
         tx.commit();
+    }
+
+    private void initFragments() {
+        fragmentMap = new HashMap<>();
+        fragmentMap.put(R.id.drawer_nav_feed, FeedsFragment.class.getName());
+        fragmentMap.put(R.id.drawer_nav_about, AboutFragment.class.getName());
+        fragmentMap.put(R.id.drawer_nav_notifications, NotificationsFragment.class.getName());
     }
 
     @Override
@@ -149,12 +153,33 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         mDrawerToggle.onConfigurationChanged(newConfig);
     }
 
+    private void handleNotification(Intent intent) {
+        String from = intent.getStringExtra(GcmHelper.NOTIFICATION_FROM);
+        // global notification - should probably launch a url
+        if (from.startsWith(FeedsFragment.FEED_TOPICS_GLOBAL)) {
+            handleNotificationGlobal(intent);
+            return;
+        }
+        // feed notification
+        setFeedsFragment(from);
+    }
+
     private void setFeedsFragment(String topic) {
         mDrawerLayout.closeDrawer(GravityCompat.START);
         FragmentTransaction tx = getSupportFragmentManager().beginTransaction();
         Fragment feedsFragment = FeedsFragment.newInstance(topic);
         tx.replace(R.id.main_content, feedsFragment);
         tx.commit();
+    }
+
+    private void handleNotificationGlobal(Intent intent) {
+        Bundle data = intent.getExtras().getParcelable(GcmHelper.NOTIFICATION_DATA);
+        String message = data.getString(FeedsFragment.NOTIFICATION_DATA_MESSAGE);
+        String url = data.getString(FeedsFragment.NOTIFICATION_DATA_URL);
+        if (url != null) {
+            Intent browseIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+            startActivity(browseIntent);
+        }
     }
 
     @Override
@@ -216,27 +241,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
         // 'from' exists - handle notification
         handleNotification(intent);
-    }
-
-    private void handleNotification(Intent intent) {
-        String from = intent.getStringExtra(GcmHelper.NOTIFICATION_FROM);
-        // global notification - should probably launch a url
-        if (from.startsWith(FeedsFragment.FEED_TOPICS_GLOBAL)) {
-            handleNotificationGlobal(intent);
-            return;
-        }
-        // feed notification
-        setFeedsFragment(from);
-    }
-
-    private void handleNotificationGlobal(Intent intent) {
-        Bundle data = intent.getExtras().getParcelable(GcmHelper.NOTIFICATION_DATA);
-        String message = data.getString(FeedsFragment.NOTIFICATION_DATA_MESSAGE);
-        String url = data.getString(FeedsFragment.NOTIFICATION_DATA_URL);
-        if (url != null) {
-            Intent browseIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
-            startActivity(browseIntent);
-        }
     }
 
     @Override
