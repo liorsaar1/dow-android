@@ -97,6 +97,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
     }
 
+    /**
+     * handle all GCM setup
+     * get the topics map from the prefs, and register them to gcm
+     * @param activity - the parent activity to be invoked when a notification comes in
+     */
     private void initGcmHelper(final Activity activity) {
         // topics map from prefs
         Map<String, Boolean> topicsMap = NotificationsFragment.getRegistrationMap(this);

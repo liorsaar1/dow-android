@@ -39,11 +39,11 @@
 
     </LinearLayout>
 
-    <TextView
+    <WebView
         android:id="@+id/episodeShowNotes"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:padding="20dip"
-        android:scrollbars="vertical"
-        android:text="asd fsad sa dfa sdf asdf asdf "/>
+        android:padding="10dip"
+        android:background="@android:color/transparent"
+        android:cacheColorHint="#00000000" />
 </LinearLayout>

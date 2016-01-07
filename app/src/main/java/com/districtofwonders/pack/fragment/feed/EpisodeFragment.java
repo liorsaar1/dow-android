@@ -2,12 +2,10 @@ package com.districtofwonders.pack.fragment.feed;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.text.Html;
-import android.text.Spanned;
-import android.text.method.ScrollingMovementMethod;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.webkit.WebView;
 import android.widget.TextView;
 
 import com.districtofwonders.pack.R;
@@ -53,10 +51,10 @@ public class EpisodeFragment extends Fragment {
             pubDate += " - " + duration + " " + "min";
         }
         ((TextView)root.findViewById(R.id.episodePubDate)).setText(pubDate);
-
-        Spanned showNotes = Html.fromHtml(mFeedItem.get(FeedParser.Tags.CONTENT_ENCODED));
-        ((TextView)root.findViewById(R.id.episodeShowNotes)).setText(showNotes);
-        ((TextView)root.findViewById(R.id.episodeShowNotes)).setMovementMethod(new ScrollingMovementMethod());
+        // show notes
+        String content = mFeedItem.get(FeedParser.Tags.CONTENT_ENCODED);
+        WebView webView = (WebView)root.findViewById(R.id.episodeShowNotes);
+        webView.loadData(content, "text/html; charset=UTF-8", null);
 
         return root;
     }
