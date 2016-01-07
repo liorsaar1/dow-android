@@ -63,7 +63,6 @@ public class FeedParser extends DomParser {
     }
 
     class Tags {
-        public static final String FEED_NAME = "feedName";
         public static final String TITLE = "title";
         public static final String LINK = "link";
         public static final String PUB_DATE = "pubDate";

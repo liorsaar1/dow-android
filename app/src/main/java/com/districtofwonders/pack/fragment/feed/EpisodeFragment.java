@@ -1,5 +1,6 @@
 package com.districtofwonders.pack.fragment.feed;
 
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
@@ -23,6 +24,8 @@ public class EpisodeFragment extends Fragment {
 
     private Map<String, String> mFeedItem;
     private int mPageNumber;
+    private TextView mEpisodePlay;
+    private TextView mEpisodeDownload;
 
     public static Fragment newInstance(int pageNumber, Map<String, String> feedItem) {
         EpisodeFragment fragment = new EpisodeFragment();
@@ -58,13 +61,15 @@ public class EpisodeFragment extends Fragment {
         ((TextView)root.findViewById(R.id.episodeDuration)).setText(durationString);
 
         // buttons
-        root.findViewById(R.id.episodePlay).setOnClickListener(new View.OnClickListener() {
+        mEpisodePlay = (TextView)root.findViewById(R.id.episodePlay);
+        mEpisodePlay.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 onClickPlay();
             }
         });
-        root.findViewById(R.id.episodeDownload).setOnClickListener(new View.OnClickListener() {
+        mEpisodeDownload = (TextView)root.findViewById(R.id.episodeDownload);
+        mEpisodeDownload.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 onClickDownload();
@@ -75,7 +80,17 @@ public class EpisodeFragment extends Fragment {
         WebView webView = (WebView)root.findViewById(R.id.episodeShowNotes);
         webView.loadData(content, "text/html; charset=UTF-8", null);
 
+        updateButtons(mFeedItem.get(FeedParser.Keys.ENCLOSURE_URL));
+
         return root;
+    }
+
+    private void updateButtons(String url) {
+        boolean isDownloaded = DowDownloadManager.isDownloaded(url);
+        if (isDownloaded) {
+            mEpisodeDownload.setTextColor(0xFF888888);
+            mEpisodeDownload.setEnabled(false);
+        }
     }
 
     private void onClickDownload() {
@@ -85,6 +100,15 @@ public class EpisodeFragment extends Fragment {
     }
 
     private void onClickPlay() {
-        ViewUtils.playAudio(getActivity(), mFeedItem.get(FeedParser.Keys.ENCLOSURE_URL));
+        String url = mFeedItem.get(FeedParser.Keys.ENCLOSURE_URL);
+        boolean isDownloaded = DowDownloadManager.isDownloaded(url);
+        // not downloaded - stream
+        if (!isDownloaded) {
+            ViewUtils.playAudio(getActivity(), mFeedItem.get(FeedParser.Keys.ENCLOSURE_URL));
+            return;
+        }
+        // downloaded - play local file
+        Uri uri = DowDownloadManager.getDownloadUri(url);
+        ViewUtils.playLocalAudio(getActivity(), "Choose Player:", uri);
     }
 }

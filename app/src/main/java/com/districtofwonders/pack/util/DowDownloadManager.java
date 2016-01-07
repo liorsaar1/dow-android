@@ -12,6 +12,7 @@ import android.util.Log;
 
 import com.districtofwonders.pack.fragment.feed.FeedsFragment;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -98,9 +99,23 @@ public class DowDownloadManager {
         return Environment.DIRECTORY_DOWNLOADS;
     }
 
+    public static boolean isDownloaded(String url) {
+        String filename = url.substring(url.lastIndexOf("/") + 1);
+        File path = Environment.getExternalStoragePublicDirectory(getDownloadDirectory());
+        File file = new File(path, filename);
+        return file.exists();
+    }
+
     public void showDownload(Context context) {
         Intent intent = new Intent();
         intent.setAction(DownloadManager.ACTION_VIEW_DOWNLOADS);
         context.startActivity(intent);
+    }
+
+    public static Uri getDownloadUri(String url) {
+        String filename = url.substring(url.lastIndexOf("/") + 1);
+        File path = Environment.getExternalStoragePublicDirectory(getDownloadDirectory());
+        File file = new File(path, filename);
+        return Uri.fromFile(file);
     }
 }
