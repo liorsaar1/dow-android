@@ -51,14 +51,18 @@ public class FeedViewFragment extends Fragment {
     private FeedRecyclerAdapter.OnClickListener mFeedItemOnClickListener = new FeedRecyclerAdapter.OnClickListener() {
         @Override
         public void onClickLink(int position) {
-            String link = mList.get(position).get("link");
+            if (true) {
+                MainActivity.setChildFragment(getActivity(), EpisodeFragment.newInstance(mPageNumber, mList.get(position)));
+                return;
+            }
+            String link = mList.get(position).get(FeedParser.Tags.LINK);
             Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(link));
             startActivity(browserIntent);
         }
 
         @Override
         public void onClickPlay(int position) {
-            String link = mList.get(position).get("enclosure.url");
+            String link = mList.get(position).get(FeedParser.Keys.ENCLOSURE_URL);
             Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(link));
             startActivity(browserIntent);
         }
@@ -154,6 +158,7 @@ public class FeedViewFragment extends Fragment {
                 new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
+                        mSwipeRefreshLayout.setRefreshing(false);
                         setError(error); // network error
                     }
                 });
@@ -245,11 +250,7 @@ class FeedRecyclerAdapter extends RecyclerView.Adapter<FeedRecyclerAdapter.FeedR
 
     private String getTitle(int position) {
         String title = list.get(position).get(FeedParser.Tags.TITLE);
-        String feedTitle = FeedsFragment.feeds[pageNumber].title;
-        if (title.toLowerCase().startsWith(feedTitle.toLowerCase())) {
-            title = title.substring(feedTitle.length()+1);
-        }
-        return title;
+        return FeedsFragment.extractFeedItemTitle(pageNumber, title);
     }
 
     private String getPubDate(int position) {
@@ -266,7 +267,7 @@ class FeedRecyclerAdapter extends RecyclerView.Adapter<FeedRecyclerAdapter.FeedR
             return null;
         }
         int minutes = DateUtils.getMinutes(durationString);
-        return minutes + " min";
+        return minutes + " " + "min";
     }
 
     @Override

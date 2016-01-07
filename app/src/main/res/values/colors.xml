@@ -6,4 +6,6 @@
     <color name="colorAccent">#00EAFF</color>
     <color name="colorTextPrimary">#212121</color>
     <color name="colorTextSecondary">#727272</color>
+    <color name="episode_header_background">#000000</color>
+    <color name="episode_header_text">#ffffff</color>
 </resources>
