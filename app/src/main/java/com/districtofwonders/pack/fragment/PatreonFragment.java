@@ -12,20 +12,25 @@ import android.widget.ProgressBar;
 
 import com.districtofwonders.pack.R;
 
+/**
+ * KISS TTM
+ * load the existing patreon page into a webview
+ * <p/>
+ * Created by liorsaar on 2015-12-16
+ */
 public class PatreonFragment extends Fragment {
 
     private ProgressBar mProgressBar;
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         ViewGroup root = (ViewGroup) inflater.inflate(R.layout.patreon_fragment, null);
 
-        String url = "https://www.patreon.com/districtofwonders?ty=h";
-        //url = "http://www.districtofwonders.com";
+        String url = getActivity().getString(R.string.link_patreon);
 
-        mProgressBar = (ProgressBar)root.findViewById(R.id.patreonProgress);
+        mProgressBar = (ProgressBar) root.findViewById(R.id.patreonProgress);
 
-        WebView webView = (WebView)root.findViewById(R.id.patreonWebview);
+        WebView webView = (WebView) root.findViewById(R.id.patreonWebview);
         WebSettings webSettings = webView.getSettings();
         webSettings.setJavaScriptEnabled(true);
 
@@ -43,10 +48,10 @@ public class PatreonFragment extends Fragment {
             mProgressBar.setVisibility(View.GONE);
         }
 
-//        @Override
-//        public boolean shouldOverrideUrlLoading(WebView view, String url) {
-//            view.loadUrl(url);
-//            return true;
-//        }
+        @Override
+        public void onReceivedError(WebView view, int errorCode, String description, String failingUrl) {
+            super.onReceivedError(view, errorCode, description, failingUrl);
+            mProgressBar.setVisibility(View.GONE);
+        }
     }
 }

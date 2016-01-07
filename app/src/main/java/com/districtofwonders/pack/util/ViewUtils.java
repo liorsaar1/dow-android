@@ -4,8 +4,10 @@ import android.app.Activity;
 import android.app.DatePickerDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
 import android.support.v7.app.AlertDialog;
 import android.view.View;
 import android.view.ViewGroup;
@@ -193,4 +195,8 @@ public class ViewUtils {
                 .show();
     }
 
+    public static void playAudio(FragmentActivity activity, String link) {
+        Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(link));
+        activity.startActivity(browserIntent);
+    }
 }

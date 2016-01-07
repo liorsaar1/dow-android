@@ -10,6 +10,7 @@ import android.widget.TextView;
 
 import com.districtofwonders.pack.R;
 import com.districtofwonders.pack.util.DateUtils;
+import com.districtofwonders.pack.util.ViewUtils;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -44,18 +45,43 @@ public class EpisodeFragment extends Fragment {
         // episode title
         String title = FeedsFragment.extractFeedItemTitle(mPageNumber, mFeedItem.get(FeedParser.Tags.TITLE));
         ((TextView)root.findViewById(R.id.episodeTitle)).setText(title);
-        // date + duration
+        // date
         String pubDate = DateUtils.getPubDate(mFeedItem.get(FeedParser.Tags.PUB_DATE));
+        ((TextView)root.findViewById(R.id.episodePubDate)).setText(pubDate);
+        // duration
+        String durationString = "";
         if (mFeedItem.get(FeedParser.Tags.DURATION) != null) {
             int duration = DateUtils.getMinutes(mFeedItem.get(FeedParser.Tags.DURATION));
-            pubDate += " - " + duration + " " + "min";
+            durationString = duration + " " + "min";
         }
-        ((TextView)root.findViewById(R.id.episodePubDate)).setText(pubDate);
+        ((TextView)root.findViewById(R.id.episodeDuration)).setText(durationString);
+
+        // buttons
+        root.findViewById(R.id.episodePlay).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                onClickPlay();
+            }
+        });
+        root.findViewById(R.id.episodeDownload).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                onClickDownload();
+            }
+        });
         // show notes
         String content = mFeedItem.get(FeedParser.Tags.CONTENT_ENCODED);
         WebView webView = (WebView)root.findViewById(R.id.episodeShowNotes);
         webView.loadData(content, "text/html; charset=UTF-8", null);
 
         return root;
+    }
+
+    private void onClickDownload() {
+
+    }
+
+    private void onClickPlay() {
+        ViewUtils.playAudio(getActivity(), mFeedItem.get(FeedParser.Keys.ENCLOSURE_URL));
     }
 }

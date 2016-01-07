@@ -2,6 +2,10 @@
     <string name="app_name">District of Wonders</string>
     <string name="app_label">District of Wonders</string>
 
+    <!-- literals -->
+    <string name="please_wait">Please Wait...</string>
+
+    <!-- drawer -->
     <string name="drawer_open">Open</string>
     <string name="drawer_close">Close</string>
     <string name="drawer_nav_feed">Feed</string>
@@ -14,7 +18,7 @@
     <string name="drawer_nav_notifications">Notifications</string>
     <string name="action_settings">Settings</string>
 
-
+    <!-- GCM -->
     <string name="gcm_send_message">Token retrieved and sent to server! You can now use gcmsender to
         send downstream messages to this app.</string>
     <string name="gcm_registering_message">Generating InstanceID token...</string>
@@ -22,8 +26,9 @@
         sending the fetched token to the server or subscribing to the PubSub topic. Please try
         running the sample again.</string>
     <string name="notifications_updating_preferences">Updating Preferences</string>
-    <string name="please_wait">Please Wait...</string>
     <string name="notifications_disabled_restart">Notifications Server Unreachable.\nPlease restart the app.</string>
-    <string name="dow">District of Wonders</string>
+
+    <!-- links -->
+    <string name="link_patreon">https://www.patreon.com/districtofwonders</string>
 
 </resources>

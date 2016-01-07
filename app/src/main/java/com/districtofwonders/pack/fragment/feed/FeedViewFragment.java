@@ -1,8 +1,6 @@
 package com.districtofwonders.pack.fragment.feed;
 
 import android.content.Context;
-import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.Fragment;
@@ -51,20 +49,13 @@ public class FeedViewFragment extends Fragment {
     private FeedRecyclerAdapter.OnClickListener mFeedItemOnClickListener = new FeedRecyclerAdapter.OnClickListener() {
         @Override
         public void onClickLink(int position) {
-            if (true) {
-                MainActivity.setChildFragment(getActivity(), EpisodeFragment.newInstance(mPageNumber, mList.get(position)));
-                return;
-            }
-            String link = mList.get(position).get(FeedParser.Tags.LINK);
-            Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(link));
-            startActivity(browserIntent);
+            MainActivity.setChildFragment(getActivity(), EpisodeFragment.newInstance(mPageNumber, mList.get(position)));
         }
 
         @Override
         public void onClickPlay(int position) {
             String link = mList.get(position).get(FeedParser.Keys.ENCLOSURE_URL);
-            Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(link));
-            startActivity(browserIntent);
+            ViewUtils.playAudio(getActivity(), link);
         }
 
         @Override

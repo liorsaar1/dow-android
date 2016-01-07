@@ -168,6 +168,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         fragmentMap.put(R.id.drawer_nav_about, AboutFragment.class.getName());
         fragmentMap.put(R.id.drawer_nav_notifications, NotificationsFragment.class.getName());
         fragmentMap.put(R.id.drawer_nav_patreon, PatreonFragment.class.getName());
+        //fragmentMap.put(R.id.drawer_nav_help, AboutFragment.class.getName());
+        fragmentMap.put(R.id.drawer_nav_shop, AboutFragment.class.getName());
+        fragmentMap.put(R.id.drawer_nav_sofanaut, AboutFragment.class.getName());
+        fragmentMap.put(R.id.drawer_nav_newsletter, AboutFragment.class.getName());
     }
 
     @Override
