@@ -51,14 +51,18 @@ public class FeedViewFragment extends Fragment {
     private FeedRecyclerAdapter.OnClickListener mFeedItemOnClickListener = new FeedRecyclerAdapter.OnClickListener() {
         @Override
         public void onClickLink(int position) {
-            String link = mList.get(position).get("link");
+            if (true) {
+                MainActivity.setChildFragment(getActivity(), EpisodeFragment.class.getName());
+                return;
+            }
+            String link = mList.get(position).get(FeedParser.Tags.LINK);
             Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(link));
             startActivity(browserIntent);
         }
 
         @Override
         public void onClickPlay(int position) {
-            String link = mList.get(position).get("enclosure.url");
+            String link = mList.get(position).get(FeedParser.Keys.ENCLOSURE_URL);
             Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(link));
             startActivity(browserIntent);
         }
@@ -154,6 +158,7 @@ public class FeedViewFragment extends Fragment {
                 new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
+                        mSwipeRefreshLayout.setRefreshing(false);
                         setError(error); // network error
                     }
                 });

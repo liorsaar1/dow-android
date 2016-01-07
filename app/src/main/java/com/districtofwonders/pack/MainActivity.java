@@ -14,7 +14,7 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentTransaction;
+import android.support.v4.app.FragmentActivity;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -45,6 +45,15 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private int mSelectedId;
     private boolean mUserSawDrawer = false;
     private GcmHelper gcmHelper;
+
+    public static void setChildFragment(FragmentActivity activity, String className) {
+        Fragment fragment = Fragment.instantiate(activity, className);
+        activity.getSupportFragmentManager()
+                .beginTransaction()
+                .addToBackStack(className)
+                .replace(R.id.main_content, fragment)
+                .commit();
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -133,11 +142,15 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     private void setFragment(int navId) {
-        FragmentTransaction tx = getSupportFragmentManager().beginTransaction();
-        String className = fragmentMap.get(navId);
-        Fragment fragment = Fragment.instantiate(this, className);
-        tx.replace(R.id.main_content, fragment);
-        tx.commit();
+        setRootFragment(this, fragmentMap.get(navId));
+    }
+
+    public static void setRootFragment(FragmentActivity activity, String className) {
+        Fragment fragment = Fragment.instantiate(activity, className);
+        activity.getSupportFragmentManager()
+                .beginTransaction()
+                .replace(R.id.main_content, fragment)
+                .commit();
     }
 
     private void initFragments() {
@@ -166,10 +179,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     private void setFeedsFragment(String topic) {
         mDrawerLayout.closeDrawer(GravityCompat.START);
-        FragmentTransaction tx = getSupportFragmentManager().beginTransaction();
         Fragment feedsFragment = FeedsFragment.newInstance(topic);
-        tx.replace(R.id.main_content, feedsFragment);
-        tx.commit();
+        getSupportFragmentManager()
+                .beginTransaction()
+                .addToBackStack(FeedsFragment.class.getName())
+                .replace(R.id.main_content, feedsFragment)
+                .commit();
     }
 
     private void handleNotificationGlobal(Intent intent) {
