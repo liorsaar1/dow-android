@@ -22,7 +22,7 @@ import javax.xml.parsers.ParserConfigurationException;
 public class FeedParser extends DomParser {
 
     private static List<String> requiredTags = new ArrayList<>(
-            Arrays.asList(Tags.TITLE, Tags.LINK, Tags.PUB_DATE, Tags.DURATION));
+            Arrays.asList(Tags.TITLE, Tags.LINK, Tags.PUB_DATE, Tags.DURATION, Tags.CONTENT_ENCODED));
 
     public FeedParser(String xmlString) throws ParserConfigurationException, IOException, SAXException {
         super(xmlString);
@@ -68,6 +68,7 @@ public class FeedParser extends DomParser {
         public static final String PUB_DATE = "pubDate";
         public static final String DURATION = "itunes:duration";
         public static final String URL = "url";
+        public static final String CONTENT_ENCODED = "content:encoded";
     }
 
     class Keys {

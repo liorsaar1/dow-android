@@ -47,14 +47,16 @@ public class FeedsFragment extends Fragment {
     };
     public static final String FEED_TOPICS_GLOBAL = "/topics/global";
     private static final String ARG_TOPIC = "topic";
+    private static final int[] feedIcon = {R.drawable.ic_sss, R.drawable.ic_fff, R.drawable.ic_ttt, R.drawable.ic_dow};
+    private static List<Bitmap> feedIconBitmap;
     private ViewPager mPager;
 
     public static Fragment newInstance(String topic) {
-        FeedsFragment feedsFragment = new FeedsFragment();
+        FeedsFragment fragment = new FeedsFragment();
         Bundle arguments = new Bundle();
         arguments.putString(ARG_TOPIC, topic);
-        feedsFragment.setArguments(arguments);
-        return feedsFragment;
+        fragment.setArguments(arguments);
+        return fragment;
     }
 
     /**
@@ -108,15 +110,20 @@ public class FeedsFragment extends Fragment {
         return feedIconBitmap.get(feedIndex);
     }
 
-    private static final int[] feedIcon = { R.drawable.ic_sss, R.drawable.ic_fff, R.drawable.ic_ttt, R.drawable.ic_dow};
-    private static List<Bitmap> feedIconBitmap;
+    public static String extractFeedItemTitle(int pageNumber, String title) {
+        String feedTitle = FeedsFragment.feeds[pageNumber].title;
+        if (title.toLowerCase().startsWith(feedTitle.toLowerCase())) {
+            title = title.substring(feedTitle.length() + 1);
+        }
+        return title;
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         ViewGroup root = (ViewGroup) inflater.inflate(R.layout.feed_fragment, null);
 
         TabLayout mTabLayout = (TabLayout) root.findViewById(R.id.feed_tab_layout);
-        FeedsPagerAdapter mAdapter = new FeedsPagerAdapter(getActivity().getSupportFragmentManager());
+        FeedsPagerAdapter mAdapter = new FeedsPagerAdapter(getChildFragmentManager());
         mPager = (ViewPager) root.findViewById(R.id.feed_view_pager);
         mPager.setAdapter(mAdapter);
         mTabLayout.setTabsFromPagerAdapter(mAdapter);

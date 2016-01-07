@@ -27,7 +27,7 @@ public class DateUtils {
     }
 
     public static String getDayString(Calendar calendar) {
-        return new SimpleDateFormat("dd").format(calendar.getTime());
+        return new SimpleDateFormat("d").format(calendar.getTime());
     }
 
     public static int getMinutes(String durationString) {
@@ -48,5 +48,10 @@ public class DateUtils {
             throw new IllegalArgumentException("Illegal duration format" + durationString);
         }
         throw new IllegalArgumentException("Illegal duration format" + durationString);
+    }
+
+    public static String getPubDate(String pubDateString) {
+        Calendar calendar = getPubDateCal(pubDateString);
+        return new SimpleDateFormat("d MMM yyyy").format(calendar.getTime());
     }
 }

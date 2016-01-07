@@ -47,10 +47,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private GcmHelper gcmHelper;
 
     public static void setChildFragment(FragmentActivity activity, String className) {
-        Fragment fragment = Fragment.instantiate(activity, className);
+        setChildFragment(activity, Fragment.instantiate(activity, className));
+    }
+
+    public static void setChildFragment(FragmentActivity activity, Fragment fragment) {
         activity.getSupportFragmentManager()
                 .beginTransaction()
-                .addToBackStack(className)
+                .addToBackStack(fragment.getClass().getName())
                 .replace(R.id.main_content, fragment)
                 .commit();
     }
