@@ -54,8 +54,8 @@ public class FeedViewFragment extends Fragment {
 
         @Override
         public void onClickPlay(int position) {
-            String link = mList.get(position).get(FeedParser.Keys.ENCLOSURE_URL);
-            ViewUtils.playAudio(getActivity(), link);
+            String url = mList.get(position).get(FeedParser.Keys.ENCLOSURE_URL);
+            ViewUtils.playAudio(getActivity(), url);
         }
 
         @Override

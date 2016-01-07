@@ -10,6 +10,7 @@ import android.widget.TextView;
 
 import com.districtofwonders.pack.R;
 import com.districtofwonders.pack.util.DateUtils;
+import com.districtofwonders.pack.util.DowDownloadManager;
 import com.districtofwonders.pack.util.ViewUtils;
 
 import java.util.HashMap;
@@ -78,7 +79,9 @@ public class EpisodeFragment extends Fragment {
     }
 
     private void onClickDownload() {
-
+        String url = mFeedItem.get(FeedParser.Keys.ENCLOSURE_URL);
+        String title = mFeedItem.get(FeedParser.Tags.TITLE);
+        DowDownloadManager.getInstance(getActivity()).enqueueRequest(getActivity(), mPageNumber, url, title);
     }
 
     private void onClickPlay() {

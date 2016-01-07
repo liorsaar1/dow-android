@@ -195,8 +195,14 @@ public class ViewUtils {
                 .show();
     }
 
-    public static void playAudio(FragmentActivity activity, String link) {
-        Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(link));
+    public static void playAudio(FragmentActivity activity, String url) {
+        Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
         activity.startActivity(browserIntent);
+    }
+
+    public static void playLocalAudio(Context context, String title, Uri uri) {
+        Intent viewIntent = new Intent(Intent.ACTION_VIEW);
+        viewIntent.setDataAndType(uri, "audio/*");
+        context.startActivity(Intent.createChooser(viewIntent, title));
     }
 }
