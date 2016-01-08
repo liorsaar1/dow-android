@@ -3,6 +3,7 @@ package com.districtofwonders.pack.fragment.feed;
 import android.app.DownloadManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.Uri;
@@ -31,6 +32,15 @@ public class EpisodeFragment extends Fragment {
     private int mPageNumber;
     private TextView mEpisodePlay;
     private TextView mEpisodeDownload;
+    /**
+     * when a download is completed - update the play/download buttons state
+     */
+    private BroadcastReceiver mDownloadCompleteReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            updateButtons(context);
+        }
+    };
 
     public static Fragment newInstance(int pageNumber, Map<String, String> feedItem) {
         EpisodeFragment fragment = new EpisodeFragment();
@@ -70,14 +80,14 @@ public class EpisodeFragment extends Fragment {
         mEpisodePlay.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                onClickPlay();
+                onClickPlay(getActivity());
             }
         });
         mEpisodeDownload = (TextView) root.findViewById(R.id.episodeDownload);
         mEpisodeDownload.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                onClickDownload();
+                onClickDownload(getActivity());
             }
         });
         // show notes
@@ -85,7 +95,8 @@ public class EpisodeFragment extends Fragment {
         WebView webView = (WebView) root.findViewById(R.id.episodeShowNotes);
         webView.loadData(content, "text/html; charset=UTF-8", null);
 
-        updateButtons();
+        // update buttons state
+        updateButtons(getActivity());
 
         // register the receiver
         IntentFilter downloadCompleteIntentFilter = new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE);
@@ -93,49 +104,60 @@ public class EpisodeFragment extends Fragment {
         return root;
     }
 
-    private void updateButtons() {
+    // enqueue a download request
+    private void onClickDownload(final Context context) {
+        final String url = mFeedItem.get(FeedParser.Keys.ENCLOSURE_URL);
+        final String title = mFeedItem.get(FeedParser.Tags.TITLE);
+        if (!DowDownloadManager.getInstance(context).isWiFiAvailable(context)) {
+            ViewUtils.showWifiWarning(context, new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    enqueueRequest(context, mPageNumber, url, title);
+                }
+            });
+        }
+        enqueueRequest(context, mPageNumber, url, title);
+    }
+
+    private void enqueueRequest(Context context, int pageNumber, String url, String title) {
+        DowDownloadManager.getInstance(context).enqueueRequest(pageNumber, url, title);
+        updateButtons(context);
+    }
+
+    /**
+     * enable/disable the buttons
+     */
+    private void updateButtons(Context context) {
+        int greyOut = context.getResources().getColor(R.color.colorTextSecondary);
         String url = mFeedItem.get(FeedParser.Keys.ENCLOSURE_URL);
         // play button - disabled if no url
         if (url == null) {
-            mEpisodePlay.setTextColor(0xFF888888);
+            mEpisodePlay.setTextColor(greyOut);
             mEpisodePlay.setEnabled(false);
+            mEpisodeDownload.setTextColor(greyOut);
+            mEpisodeDownload.setEnabled(false);
+            return;
         }
-        // download button - greyed out if the file was already downloaded or no url exist
-        boolean isDownloadDisabled = (url == null) || DowDownloadManager.isDownloaded(url);
+        // download button - greyed out if the file was already downloaded or is downloading
+        boolean isDownloadDisabled = DowDownloadManager.isDownloaded(url) || DowDownloadManager.getInstance(context).isDownloadInProgress(url);
         if (isDownloadDisabled) {
-            mEpisodeDownload.setTextColor(0xFF888888);
+            mEpisodeDownload.setTextColor(greyOut);
             mEpisodeDownload.setEnabled(false);
         }
     }
 
-    private void onClickDownload() {
-        String url = mFeedItem.get(FeedParser.Keys.ENCLOSURE_URL);
-        String title = mFeedItem.get(FeedParser.Tags.TITLE);
-        DowDownloadManager.getInstance(getActivity()).enqueueRequest(mPageNumber, url, title);
-    }
-
-    private void onClickPlay() {
+    private void onClickPlay(Context context) {
         String url = mFeedItem.get(FeedParser.Keys.ENCLOSURE_URL);
         boolean isDownloaded = DowDownloadManager.isDownloaded(url);
         // not downloaded - stream
         if (!isDownloaded) {
-            ViewUtils.playAudio(getActivity(), mFeedItem.get(FeedParser.Keys.ENCLOSURE_URL));
+            ViewUtils.playAudio(context, mFeedItem.get(FeedParser.Keys.ENCLOSURE_URL));
             return;
         }
         // downloaded - play local file
         Uri uri = DowDownloadManager.getDownloadUri(url);
-        ViewUtils.playLocalAudio(getActivity(), "Choose Player:", uri);
+        ViewUtils.playLocalAudio(context, context.getString(R.string.choose_player), uri);
     }
-
-    /**
-     * when a download is completed - update the play/download buttons state
-     */
-    private BroadcastReceiver mDownloadCompleteReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            updateButtons();
-        }
-    };
 
 
 }

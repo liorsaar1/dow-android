@@ -6,6 +6,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.database.Cursor;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Environment;
 import android.util.Log;
@@ -22,7 +24,7 @@ import java.util.Map;
 public class DowDownloadManager {
     private static final String TAG = DowDownloadManager.class.getSimpleName();
     private static DowDownloadManager mInstance;
-    private final Map<Long, String> mDownloadIdMap;
+    private static Map<Long, String[]> mDownloadIdMap;
     private DownloadManager mDownloadManager;
 
     private BroadcastReceiver mDownloadCompleteReceiver = new BroadcastReceiver() {
@@ -53,7 +55,7 @@ public class DowDownloadManager {
             int uriIndex = cursor.getColumnIndex(DownloadManager.COLUMN_LOCAL_URI);
             String downloadedPackageUriString = cursor.getString(uriIndex);
 
-            String title = "Download Completed: " + mDownloadIdMap.get(id);
+            String title = "Download Completed: " + mDownloadIdMap.get(id)[0];
             Uri uri = Uri.parse(downloadedPackageUriString);
             ViewUtils.playLocalAudio(context, title, uri);
         }
@@ -92,7 +94,7 @@ public class DowDownloadManager {
 
         // enqueue this request
         long downloadID = mDownloadManager.enqueue(request);
-        mDownloadIdMap.put(downloadID, title);
+        mDownloadIdMap.put(downloadID, new String[] {title, url});
     }
 
     public static String getDownloadDirectory() {
@@ -106,16 +108,24 @@ public class DowDownloadManager {
         return file.exists();
     }
 
-    public void showDownload(Context context) {
-        Intent intent = new Intent();
-        intent.setAction(DownloadManager.ACTION_VIEW_DOWNLOADS);
-        context.startActivity(intent);
-    }
-
     public static Uri getDownloadUri(String url) {
         String filename = url.substring(url.lastIndexOf("/") + 1);
         File path = Environment.getExternalStoragePublicDirectory(getDownloadDirectory());
         File file = new File(path, filename);
         return Uri.fromFile(file);
+    }
+
+    public boolean isWiFiAvailable(Context context) {
+        ConnectivityManager connManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo mWifi = connManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
+        return mWifi.isConnected();
+    }
+
+    public boolean isDownloadInProgress(String url) {
+        for (String[] value : mDownloadIdMap.values()) {
+            if (value[1].equals(url))
+                return true;
+        }
+        return false;
     }
 }

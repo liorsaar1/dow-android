@@ -3,11 +3,11 @@ package com.districtofwonders.pack.util;
 import android.app.Activity;
 import android.app.DatePickerDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentActivity;
 import android.support.v7.app.AlertDialog;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,6 +16,8 @@ import android.widget.DatePicker;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
+
+import com.districtofwonders.pack.R;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -187,7 +189,7 @@ public class ViewUtils {
 
     public static void showError(Context context, String error) {
         new AlertDialog.Builder(context)
-                .setTitle("Error")
+                .setTitle(context.getString(R.string.error))
                 .setMessage(error)
                 .setPositiveButton(android.R.string.ok, null)
                 .setIcon(android.R.drawable.ic_dialog_alert)
@@ -195,7 +197,18 @@ public class ViewUtils {
                 .show();
     }
 
-    public static void playAudio(FragmentActivity activity, String url) {
+    public static void showWifiWarning(Context context, DialogInterface.OnClickListener onClickListener) {
+        new AlertDialog.Builder(context)
+                .setTitle(context.getString(R.string.warning))
+                .setMessage(context.getString(R.string.wifi_not_available))
+                .setIcon(android.R.drawable.ic_dialog_alert)
+                .setIconAttribute(android.R.attr.alertDialogIcon)
+                .setNegativeButton(android.R.string.cancel, null)
+                .setPositiveButton(android.R.string.ok, onClickListener)
+                .show();
+    }
+
+    public static void playAudio(Context activity, String url) {
         Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
         activity.startActivity(browserIntent);
     }

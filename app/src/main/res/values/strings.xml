@@ -4,6 +4,9 @@
 
     <!-- literals -->
     <string name="please_wait">Please Wait...</string>
+    <string name="error">Error</string>
+    <string name="warning">Warning</string>
+    <string name="choose_player">Choose Player:</string>
 
     <!-- drawer -->
     <string name="drawer_open">Open</string>
@@ -30,5 +33,8 @@
 
     <!-- links -->
     <string name="link_patreon">https://www.patreon.com/districtofwonders</string>
+
+    <!-- download -->
+    <string name="wifi_not_available">WiFi connection not available - allow download on mobile network?</string>
 
 </resources>
