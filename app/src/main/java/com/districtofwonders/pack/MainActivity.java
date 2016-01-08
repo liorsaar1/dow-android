@@ -36,7 +36,6 @@ import java.util.Map;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
-    public static final boolean DEBUG = true;
     private static final String SELECTED_ITEM_ID = "selected_item_id";
     private static final String FIRST_TIME = "first_time";
     private static final String TAG = MainActivity.class.getSimpleName();

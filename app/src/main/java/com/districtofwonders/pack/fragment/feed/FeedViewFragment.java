@@ -17,6 +17,7 @@ import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
+import com.districtofwonders.pack.BuildConfig;
 import com.districtofwonders.pack.DowSingleton;
 import com.districtofwonders.pack.MainActivity;
 import com.districtofwonders.pack.R;
@@ -164,7 +165,7 @@ public class FeedViewFragment extends Fragment {
 
     private void setError(String message) {
         // in production - do not show detailed error
-        if (!MainActivity.DEBUG) {
+        if (!BuildConfig.DEBUG) {
             message = "Server Error";
         }
         mError.setVisibility(View.VISIBLE);
@@ -172,7 +173,7 @@ public class FeedViewFragment extends Fragment {
     }
 
     private void setData(String xmlString) throws IOException, XmlPullParserException, ParserConfigurationException, SAXException {
-        if (MainActivity.DEBUG)
+        if (BuildConfig.DEBUG)
             Log.e(TAG, xmlString.substring(300, 600));
 
         FeedParser parser = new FeedParser(xmlString);
