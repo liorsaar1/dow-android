@@ -26,6 +26,7 @@ import android.view.MenuItem;
 
 import com.districtofwonders.pack.fragment.AboutFragment;
 import com.districtofwonders.pack.fragment.NotificationsFragment;
+import com.districtofwonders.pack.fragment.PatreonFragment;
 import com.districtofwonders.pack.fragment.feed.FeedsFragment;
 import com.districtofwonders.pack.gcm.GcmHelper;
 import com.districtofwonders.pack.util.ViewUtils;
@@ -35,7 +36,6 @@ import java.util.Map;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
-    public static final boolean DEBUG = true;
     private static final String SELECTED_ITEM_ID = "selected_item_id";
     private static final String FIRST_TIME = "first_time";
     private static final String TAG = MainActivity.class.getSimpleName();
@@ -166,6 +166,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         fragmentMap.put(R.id.drawer_nav_feed, FeedsFragment.class.getName());
         fragmentMap.put(R.id.drawer_nav_about, AboutFragment.class.getName());
         fragmentMap.put(R.id.drawer_nav_notifications, NotificationsFragment.class.getName());
+        fragmentMap.put(R.id.drawer_nav_patreon, PatreonFragment.class.getName());
+        //fragmentMap.put(R.id.drawer_nav_help, AboutFragment.class.getName());
+        fragmentMap.put(R.id.drawer_nav_shop, AboutFragment.class.getName());
+        fragmentMap.put(R.id.drawer_nav_sofanaut, AboutFragment.class.getName());
+        fragmentMap.put(R.id.drawer_nav_newsletter, AboutFragment.class.getName());
     }
 
     @Override

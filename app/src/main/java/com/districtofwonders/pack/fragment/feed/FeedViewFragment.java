@@ -1,8 +1,6 @@
 package com.districtofwonders.pack.fragment.feed;
 
 import android.content.Context;
-import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.Fragment;
@@ -19,6 +17,7 @@ import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
+import com.districtofwonders.pack.BuildConfig;
 import com.districtofwonders.pack.DowSingleton;
 import com.districtofwonders.pack.MainActivity;
 import com.districtofwonders.pack.R;
@@ -51,20 +50,13 @@ public class FeedViewFragment extends Fragment {
     private FeedRecyclerAdapter.OnClickListener mFeedItemOnClickListener = new FeedRecyclerAdapter.OnClickListener() {
         @Override
         public void onClickLink(int position) {
-            if (true) {
-                MainActivity.setChildFragment(getActivity(), EpisodeFragment.newInstance(mPageNumber, mList.get(position)));
-                return;
-            }
-            String link = mList.get(position).get(FeedParser.Tags.LINK);
-            Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(link));
-            startActivity(browserIntent);
+            MainActivity.setChildFragment(getActivity(), EpisodeFragment.newInstance(mPageNumber, mList.get(position)));
         }
 
         @Override
         public void onClickPlay(int position) {
-            String link = mList.get(position).get(FeedParser.Keys.ENCLOSURE_URL);
-            Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(link));
-            startActivity(browserIntent);
+            String url = mList.get(position).get(FeedParser.Keys.ENCLOSURE_URL);
+            ViewUtils.playAudio(getActivity(), url);
         }
 
         @Override
@@ -173,7 +165,7 @@ public class FeedViewFragment extends Fragment {
 
     private void setError(String message) {
         // in production - do not show detailed error
-        if (!MainActivity.DEBUG) {
+        if (!BuildConfig.DEBUG) {
             message = "Server Error";
         }
         mError.setVisibility(View.VISIBLE);
@@ -181,7 +173,7 @@ public class FeedViewFragment extends Fragment {
     }
 
     private void setData(String xmlString) throws IOException, XmlPullParserException, ParserConfigurationException, SAXException {
-        if (MainActivity.DEBUG)
+        if (BuildConfig.DEBUG)
             Log.e(TAG, xmlString.substring(300, 600));
 
         FeedParser parser = new FeedParser(xmlString);
@@ -234,6 +226,8 @@ class FeedRecyclerAdapter extends RecyclerView.Adapter<FeedRecyclerAdapter.FeedR
                 listener.onClickLink(position);
             }
         });
+        int playVisibility = isPlayable(position) ? View.VISIBLE : View.INVISIBLE;
+        feedRecyclerViewHolder.play.setVisibility(playVisibility);
         feedRecyclerViewHolder.play.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -246,6 +240,10 @@ class FeedRecyclerAdapter extends RecyclerView.Adapter<FeedRecyclerAdapter.FeedR
                 listener.onClickDownload(position);
             }
         });
+    }
+
+    private boolean isPlayable(int position) {
+        return list.get(position).get(FeedParser.Keys.ENCLOSURE_URL) != null;
     }
 
     private String getTitle(int position) {
