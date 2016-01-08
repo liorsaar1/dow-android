@@ -225,6 +225,8 @@ class FeedRecyclerAdapter extends RecyclerView.Adapter<FeedRecyclerAdapter.FeedR
                 listener.onClickLink(position);
             }
         });
+        int playVisibility = isPlayable(position) ? View.VISIBLE : View.INVISIBLE;
+        feedRecyclerViewHolder.play.setVisibility(playVisibility);
         feedRecyclerViewHolder.play.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -237,6 +239,10 @@ class FeedRecyclerAdapter extends RecyclerView.Adapter<FeedRecyclerAdapter.FeedR
                 listener.onClickDownload(position);
             }
         });
+    }
+
+    private boolean isPlayable(int position) {
+        return list.get(position).get(FeedParser.Keys.ENCLOSURE_URL) != null;
     }
 
     private String getTitle(int position) {

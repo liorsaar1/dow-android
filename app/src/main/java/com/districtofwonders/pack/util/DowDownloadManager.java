@@ -76,7 +76,7 @@ public class DowDownloadManager {
         return mInstance;
     }
 
-    public void enqueueRequest(Context context, int pageNumber, String url, String title) {
+    public void enqueueRequest(int pageNumber, String url, String title) {
 
         DownloadManager.Request request = new DownloadManager.Request(Uri.parse(url));
         // only download via WIFI
