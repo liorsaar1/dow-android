@@ -128,36 +128,41 @@ public class EpisodeFragment extends Fragment {
      * enable/disable the buttons
      */
     private void updateButtons(Context context) {
-        int greyOut = context.getResources().getColor(R.color.colorTextSecondary);
         String url = mFeedItem.get(FeedParser.Keys.ENCLOSURE_URL);
-        // play button - disabled if no url
+        // no url - remove buttons
         if (url == null) {
-            mEpisodePlay.setTextColor(greyOut);
-            mEpisodePlay.setEnabled(false);
-            mEpisodeDownload.setTextColor(greyOut);
-            mEpisodeDownload.setEnabled(false);
+            mEpisodePlay.setVisibility(View.INVISIBLE);
+            mEpisodeDownload.setVisibility(View.INVISIBLE);
             return;
         }
-        // download button - greyed out if the file was already downloaded or is downloading
-        boolean isDownloadDisabled = DowDownloadManager.isDownloaded(url) || DowDownloadManager.getInstance(context).isDownloadInProgress(url);
-        if (isDownloadDisabled) {
+        // download button - invisible if file was already downloaded or is downloading
+        boolean isDownloaded = DowDownloadManager.isDownloaded(url);
+        boolean isDownloadInProfgress = DowDownloadManager.getInstance(context).isDownloadInProgress(url);
+        if (isDownloaded || isDownloadInProfgress) {
+            int greyOut = context.getResources().getColor(R.color.colorTextSecondary);
             mEpisodeDownload.setTextColor(greyOut);
             mEpisodeDownload.setEnabled(false);
+        }
+        // play button - highlighted if download completed
+        if (isDownloaded) {
+            mEpisodePlay.setTextColor(context.getResources().getColor(R.color.colorAccent));
         }
     }
 
     private void onClickPlay(Context context) {
         String url = mFeedItem.get(FeedParser.Keys.ENCLOSURE_URL);
+        playEpisode(context, url);
+    }
+
+    public static void playEpisode(Context context, String url) {
         boolean isDownloaded = DowDownloadManager.isDownloaded(url);
         // not downloaded - stream
         if (!isDownloaded) {
-            ViewUtils.playAudio(context, mFeedItem.get(FeedParser.Keys.ENCLOSURE_URL));
+            ViewUtils.playAudioStream(context, url);
             return;
         }
         // downloaded - play local file
         Uri uri = DowDownloadManager.getDownloadUri(url);
         ViewUtils.playLocalAudio(context, context.getString(R.string.choose_player), uri);
     }
-
-
 }

@@ -36,5 +36,6 @@
 
     <!-- download -->
     <string name="wifi_not_available">WiFi connection not available - allow download on mobile network?</string>
+    <string name="choose_stream_player">Choose Stream Player:</string>
 
 </resources>
