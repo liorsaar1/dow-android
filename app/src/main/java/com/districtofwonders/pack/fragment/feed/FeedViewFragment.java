@@ -1,6 +1,11 @@
 package com.districtofwonders.pack.fragment.feed;
 
+import android.app.DownloadManager;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.res.Resources;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.Fragment;
@@ -22,6 +27,7 @@ import com.districtofwonders.pack.DowSingleton;
 import com.districtofwonders.pack.MainActivity;
 import com.districtofwonders.pack.R;
 import com.districtofwonders.pack.util.DateUtils;
+import com.districtofwonders.pack.util.DowDownloadManager;
 import com.districtofwonders.pack.util.ViewUtils;
 
 import org.xml.sax.SAXException;
@@ -47,6 +53,16 @@ public class FeedViewFragment extends Fragment {
     private List<Map<String, String>> mList = new ArrayList<>();
     private TextView mError;
 
+    /**
+     * when a download is completed - update the play/download buttons state
+     */
+    private BroadcastReceiver mDownloadCompleteReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            mFeedRecyclerAdapter.notifyDataSetChanged();
+        }
+    };
+
     private FeedRecyclerAdapter.OnClickListener mFeedItemOnClickListener = new FeedRecyclerAdapter.OnClickListener() {
         @Override
         public void onClickLink(int position) {
@@ -56,7 +72,7 @@ public class FeedViewFragment extends Fragment {
         @Override
         public void onClickPlay(int position) {
             String url = mList.get(position).get(FeedParser.Keys.ENCLOSURE_URL);
-            ViewUtils.playAudio(getActivity(), url);
+            EpisodeFragment.playEpisode(getActivity(), url);
         }
 
         @Override
@@ -97,6 +113,11 @@ public class FeedViewFragment extends Fragment {
         mFeedRecyclerAdapter = new FeedRecyclerAdapter(getActivity(), mList, mPageNumber, mFeedItemOnClickListener);
         mRecyclerView.setAdapter(mFeedRecyclerAdapter);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+
+        // register the receiver
+        IntentFilter downloadCompleteIntentFilter = new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE);
+        getActivity().registerReceiver(mDownloadCompleteReceiver, downloadCompleteIntentFilter);
+
         return root;
     }
 
@@ -191,11 +212,13 @@ class FeedRecyclerAdapter extends RecyclerView.Adapter<FeedRecyclerAdapter.FeedR
     private static final String TAG = FeedRecyclerAdapter.class.getSimpleName();
     private final OnClickListener listener;
     private final int pageNumber;
+    private final Resources res;
     private List<Map<String, String>> list = new ArrayList<>();
     private LayoutInflater inflater;
 
     public FeedRecyclerAdapter(Context context, List<Map<String, String>> list, int pageNumber, OnClickListener listener) {
         inflater = LayoutInflater.from(context);
+        res = context.getResources();
         this.list = list;
         this.pageNumber = pageNumber;
         this.listener = listener;
@@ -234,6 +257,11 @@ class FeedRecyclerAdapter extends RecyclerView.Adapter<FeedRecyclerAdapter.FeedR
                 listener.onClickPlay(position);
             }
         });
+        if (isPlayable(position)) {
+            int playButtonColor = playColor(position);
+            feedRecyclerViewHolder.playButton.setTextColor(playButtonColor);
+        }
+
         feedRecyclerViewHolder.download.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -244,6 +272,12 @@ class FeedRecyclerAdapter extends RecyclerView.Adapter<FeedRecyclerAdapter.FeedR
 
     private boolean isPlayable(int position) {
         return list.get(position).get(FeedParser.Keys.ENCLOSURE_URL) != null;
+    }
+
+    private int playColor(int position) {
+        String url = list.get(position).get(FeedParser.Keys.ENCLOSURE_URL);
+        boolean isDownloaded = DowDownloadManager.isDownloaded(url);
+        return isDownloaded ? res.getColor(R.color.colorAccent) : res.getColor(R.color.colorTextSecondary);
     }
 
     private String getTitle(int position) {
@@ -281,7 +315,7 @@ class FeedRecyclerAdapter extends RecyclerView.Adapter<FeedRecyclerAdapter.FeedR
 
     static class FeedRecyclerViewHolder extends RecyclerView.ViewHolder {
 
-        TextView date, title, download, duration;
+        TextView date, title, download, duration, playButton;
         View play;
 
         public FeedRecyclerViewHolder(View itemView) {
@@ -289,6 +323,7 @@ class FeedRecyclerAdapter extends RecyclerView.Adapter<FeedRecyclerAdapter.FeedR
             date = (TextView) itemView.findViewById(R.id.feed_item_date);
             title = (TextView) itemView.findViewById(R.id.feed_item_title);
             play = itemView.findViewById(R.id.feed_item_play);
+            playButton = (TextView) itemView.findViewById(R.id.feed_item_play_button);
             download = (TextView) itemView.findViewById(R.id.feed_item_download);
             duration = (TextView) itemView.findViewById(R.id.feed_item_duration);
         }

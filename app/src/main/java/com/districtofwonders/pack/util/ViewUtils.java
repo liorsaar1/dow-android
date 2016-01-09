@@ -208,9 +208,12 @@ public class ViewUtils {
                 .show();
     }
 
-    public static void playAudio(Context activity, String url) {
-        Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
-        activity.startActivity(browserIntent);
+    public static void playAudioStream(Context context, String url) {
+        Intent browserIntent = new Intent(Intent.ACTION_VIEW);
+        Uri uri = Uri.parse(url);
+        browserIntent.setDataAndType(uri, "audio/*");
+        String chooserTitle = context.getString(R.string.choose_stream_player);
+        context.startActivity(Intent.createChooser(browserIntent, chooserTitle));
     }
 
     public static void playLocalAudio(Context context, String title, Uri uri) {
