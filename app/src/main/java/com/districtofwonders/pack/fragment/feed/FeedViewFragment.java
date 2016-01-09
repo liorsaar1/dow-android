@@ -215,10 +215,12 @@ class FeedRecyclerAdapter extends RecyclerView.Adapter<FeedRecyclerAdapter.FeedR
     private final Resources res;
     private List<Map<String, String>> list = new ArrayList<>();
     private LayoutInflater inflater;
+    private DowDownloadManager downloadManager;
 
     public FeedRecyclerAdapter(Context context, List<Map<String, String>> list, int pageNumber, OnClickListener listener) {
         inflater = LayoutInflater.from(context);
         res = context.getResources();
+        downloadManager = DowDownloadManager.getInstance(context);
         this.list = list;
         this.pageNumber = pageNumber;
         this.listener = listener;
@@ -276,7 +278,7 @@ class FeedRecyclerAdapter extends RecyclerView.Adapter<FeedRecyclerAdapter.FeedR
 
     private int playColor(int position) {
         String url = list.get(position).get(FeedParser.Keys.ENCLOSURE_URL);
-        boolean isDownloaded = DowDownloadManager.isDownloaded(url);
+        boolean isDownloaded = downloadManager.isDownloaded(url);
         return isDownloaded ? res.getColor(R.color.colorAccent) : res.getColor(R.color.colorTextSecondary);
     }
 

@@ -12,6 +12,7 @@ import android.net.Uri;
 import android.os.Environment;
 import android.util.Log;
 
+import com.districtofwonders.pack.R;
 import com.districtofwonders.pack.fragment.feed.FeedsFragment;
 
 import java.io.File;
@@ -24,7 +25,7 @@ import java.util.Map;
 public class DowDownloadManager {
     private static final String TAG = DowDownloadManager.class.getSimpleName();
     private static DowDownloadManager mInstance;
-    private static Map<Long, String[]> mDownloadIdMap;
+    private static Map<Long, DownloadDesc> mDownloadIdMap;
     private DownloadManager mDownloadManager;
 
     private BroadcastReceiver mDownloadCompleteReceiver = new BroadcastReceiver() {
@@ -49,13 +50,17 @@ public class DowDownloadManager {
             int statusIndex = cursor.getColumnIndex(DownloadManager.COLUMN_STATUS);
             if (DownloadManager.STATUS_SUCCESSFUL != cursor.getInt(statusIndex)) {
                 Log.w(TAG, "Download Failed");
+                // TODO delete partially downloaded file
                 return;
             }
+            // success !
+            mDownloadIdMap.get(id).completed = true;
+
             // http://developer.android.com/reference/android/app/DownloadManager.html
             int uriIndex = cursor.getColumnIndex(DownloadManager.COLUMN_LOCAL_URI);
             String downloadedPackageUriString = cursor.getString(uriIndex);
 
-            String title = "Download Completed: " + mDownloadIdMap.get(id)[0];
+            String title = context.getString(R.string.download_comleted) + " " + mDownloadIdMap.get(id).title;
             Uri uri = Uri.parse(downloadedPackageUriString);
             ViewUtils.playLocalAudio(context, title, uri);
         }
@@ -78,6 +83,17 @@ public class DowDownloadManager {
         return mInstance;
     }
 
+    public static Uri getDownloadUri(String url) {
+        String filename = url.substring(url.lastIndexOf("/") + 1);
+        File path = Environment.getExternalStoragePublicDirectory(getDownloadDirectory());
+        File file = new File(path, filename);
+        return Uri.fromFile(file);
+    }
+
+    public static String getDownloadDirectory() {
+        return Environment.DIRECTORY_DOWNLOADS;
+    }
+
     public void enqueueRequest(int pageNumber, String url, String title) {
 
         DownloadManager.Request request = new DownloadManager.Request(Uri.parse(url));
@@ -94,25 +110,7 @@ public class DowDownloadManager {
 
         // enqueue this request
         long downloadID = mDownloadManager.enqueue(request);
-        mDownloadIdMap.put(downloadID, new String[] {title, url});
-    }
-
-    public static String getDownloadDirectory() {
-        return Environment.DIRECTORY_DOWNLOADS;
-    }
-
-    public static boolean isDownloaded(String url) {
-        String filename = url.substring(url.lastIndexOf("/") + 1);
-        File path = Environment.getExternalStoragePublicDirectory(getDownloadDirectory());
-        File file = new File(path, filename);
-        return file.exists();
-    }
-
-    public static Uri getDownloadUri(String url) {
-        String filename = url.substring(url.lastIndexOf("/") + 1);
-        File path = Environment.getExternalStoragePublicDirectory(getDownloadDirectory());
-        File file = new File(path, filename);
-        return Uri.fromFile(file);
+        mDownloadIdMap.put(downloadID, new DownloadDesc(title, url));
     }
 
     public boolean isWiFiAvailable(Context context) {
@@ -121,11 +119,40 @@ public class DowDownloadManager {
         return mWifi.isConnected();
     }
 
+    public boolean isDownloaded(String url) {
+        // partial file exists, but the download is still in progress
+        if (isDownloadInProgress(url))
+            return false;
+        // file ?
+        return fileExists(url);
+    }
+
+    private boolean fileExists(String url) {
+        String filename = url.substring(url.lastIndexOf("/") + 1);
+        File path = Environment.getExternalStoragePublicDirectory(getDownloadDirectory());
+        File file = new File(path, filename);
+        return file.exists();
+    }
+
     public boolean isDownloadInProgress(String url) {
-        for (String[] value : mDownloadIdMap.values()) {
-            if (value[1].equals(url))
+        // if the url fileExists, but not completed - it is in progress
+        for (DownloadDesc desc : mDownloadIdMap.values()) {
+            if (desc.url.equals(url) && !desc.completed)
                 return true;
         }
         return false;
     }
+
+    class DownloadDesc {
+        public final String title;
+        public final String url;
+        public boolean completed;
+
+        public DownloadDesc(String title, String url) {
+            this.title = title;
+            this.url = url;
+            completed = false;
+        }
+    }
+
 }

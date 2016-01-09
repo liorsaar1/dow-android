@@ -136,9 +136,9 @@ public class EpisodeFragment extends Fragment {
             return;
         }
         // download button - invisible if file was already downloaded or is downloading
-        boolean isDownloaded = DowDownloadManager.isDownloaded(url);
-        boolean isDownloadInProfgress = DowDownloadManager.getInstance(context).isDownloadInProgress(url);
-        if (isDownloaded || isDownloadInProfgress) {
+        boolean isDownloaded = DowDownloadManager.getInstance(context).isDownloaded(url);
+        boolean isDownloadInProgress = DowDownloadManager.getInstance(context).isDownloadInProgress(url);
+        if (isDownloaded || isDownloadInProgress) {
             int greyOut = context.getResources().getColor(R.color.colorTextSecondary);
             mEpisodeDownload.setTextColor(greyOut);
             mEpisodeDownload.setEnabled(false);
@@ -155,7 +155,7 @@ public class EpisodeFragment extends Fragment {
     }
 
     public static void playEpisode(Context context, String url) {
-        boolean isDownloaded = DowDownloadManager.isDownloaded(url);
+        boolean isDownloaded = DowDownloadManager.getInstance(context).isDownloaded(url);
         // not downloaded - stream
         if (!isDownloaded) {
             ViewUtils.playAudioStream(context, url);
