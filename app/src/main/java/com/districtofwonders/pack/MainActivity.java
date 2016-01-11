@@ -253,7 +253,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     @Override
     protected void onPause() {
-        Log.e(MainActivity.TAG, "main: onPause ---");
+        Log.e(TAG, "main: onPause ---");
         gcmHelper.onPause(this);
         DowDownloadManager.getInstance(this).onPause(this);
         super.onPause();
@@ -276,7 +276,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     @Override
     protected void onResume() {
         super.onResume();
-        Log.e(MainActivity.TAG, "onResume: main");
+        Log.e(TAG, "onResume: main");
         gcmHelper.onResume(this);
         DowDownloadManager.getInstance(this).onResume(this);
     }

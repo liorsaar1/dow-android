@@ -1,11 +1,13 @@
 package com.districtofwonders.pack.fragment.feed;
 
+import android.app.DownloadManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -117,21 +119,51 @@ public class EpisodeFragment extends Fragment {
      */
     private void onClickDownload(final Context context) {
         final String url = mFeedItem.get(FeedParser.Keys.ENCLOSURE_URL);
-        final String title = mFeedItem.get(FeedParser.Tags.TITLE);
+        final String title = FeedsFragment.feeds[mPageNumber].title;
+        final String desc = FeedsFragment.extractFeedItemTitle(mPageNumber, mFeedItem.get(FeedParser.Tags.TITLE));
         if (!DowDownloadManager.getInstance(context).isWiFiAvailable(context)) {
             ViewUtils.showWifiWarning(context, new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
-                    enqueueRequest(context, mPageNumber, url, title);
+                    enqueueRequest(context, url, title, desc);
                 }
             });
+            return;
         }
-        enqueueRequest(context, mPageNumber, url, title);
+        enqueueRequest(context, url, title, desc);
     }
 
-    private void enqueueRequest(Context context, int pageNumber, String url, String title) {
-        DowDownloadManager.getInstance(context).enqueueRequest(pageNumber, url, title);
+    /**
+     * queue the request
+     * @param context
+     * @param url - download url
+     * @param title notification title display
+     * @param desc notification desc display
+     */
+    private void enqueueRequest(final Context context, String url, String title, String desc) {
+        final long downloadID = DowDownloadManager.getInstance(context).enqueueRequest(url, title, desc);
         updateButtons(context);
+        checkDownloadStatus(context, downloadID);
+    }
+
+    /**
+     * issue: when the network is unavailable, the download is PAUSED without triggering an error intent
+     * solution: manually check the download status after a few seconds
+     * @param context
+     * @param downloadID
+     */
+    private void checkDownloadStatus(final Context context, final long downloadID) {
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                int status = DowDownloadManager.getInstance(context).getDownloadStatus(downloadID);
+                if (status == DownloadManager.STATUS_PAUSED) {
+                    DowDownloadManager.getInstance(context).cancelDownload(downloadID);
+                    ViewUtils.showError(context, context.getString(R.string.server_unreachable));
+                    updateButtons(context);
+                }
+            }
+        }, 2000);
     }
 
     /**

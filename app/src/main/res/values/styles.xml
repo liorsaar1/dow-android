@@ -26,4 +26,12 @@
         <item name="android:textColor">@color/colorTextSecondary</item>
     </style>
 
+    <style name="EpisodeIcon">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_gravity">bottom</item>
+        <item name="android:textColor">@color/episode_header_text</item>
+        <item name="android:textSize">32sp</item>
+    </style>
+
 </resources>
