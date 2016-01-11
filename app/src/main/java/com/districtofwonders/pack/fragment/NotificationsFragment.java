@@ -128,7 +128,7 @@ public class NotificationsFragment extends Fragment {
         Log.e(TAG, "receive:" + isChecked);
         setReceiveNotificationsPref(getActivity(), isChecked);
 
-        final ProgressDialog progressDialog = ProgressDialog.show(getActivity(), getActivity().getString(R.string.notifications_updating_preferences), getActivity().getString(R.string.please_wait), true);
+        final ProgressDialog progressDialog = ProgressDialog.show(getActivity(), getActivity().getString(R.string.please_wait), getActivity().getString(R.string.notifications_updating_preferences), true);
 
         GcmHelper.setSubscriptions(getActivity(), getRegistrationMap(getActivity()), new GcmHelper.RegistrationListener() {
             @Override
@@ -197,7 +197,7 @@ public class NotificationsFragment extends Fragment {
     private void onCheckedTopic(final String topicName, final boolean isChecked) {
         Log.e(TAG, "receive:" + isChecked);
 
-        final ProgressDialog progressDialog = ProgressDialog.show(getActivity(), getActivity().getString(R.string.notifications_updating_preferences), getActivity().getString(R.string.please_wait), true);
+        final ProgressDialog progressDialog = ProgressDialog.show(getActivity(), getActivity().getString(R.string.please_wait), getActivity().getString(R.string.notifications_updating_preferences), true);
 
         GcmHelper.setSubscription(getActivity(), topicName, isChecked, new GcmHelper.RegistrationListener() {
             @Override

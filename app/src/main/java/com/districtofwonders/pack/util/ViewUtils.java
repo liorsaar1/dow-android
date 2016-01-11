@@ -208,6 +208,17 @@ public class ViewUtils {
                 .show();
     }
 
+    public static void showDeleteWarning(Context context, DialogInterface.OnClickListener onClickListener) {
+        new AlertDialog.Builder(context)
+                .setTitle(context.getString(R.string.warning))
+                .setMessage(context.getString(R.string.are_you_sure_delete))
+                .setIcon(android.R.drawable.ic_dialog_alert)
+                .setIconAttribute(android.R.attr.alertDialogIcon)
+                .setNegativeButton(android.R.string.cancel, null)
+                .setPositiveButton(context.getString(R.string.delete), onClickListener)
+                .show();
+    }
+
     public static void playAudioStream(Context context, String url) {
         Intent browserIntent = new Intent(Intent.ACTION_VIEW);
         Uri uri = Uri.parse(url);

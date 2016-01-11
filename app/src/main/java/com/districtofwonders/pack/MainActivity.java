@@ -29,6 +29,7 @@ import com.districtofwonders.pack.fragment.NotificationsFragment;
 import com.districtofwonders.pack.fragment.PatreonFragment;
 import com.districtofwonders.pack.fragment.feed.FeedsFragment;
 import com.districtofwonders.pack.gcm.GcmHelper;
+import com.districtofwonders.pack.util.DowDownloadManager;
 import com.districtofwonders.pack.util.ViewUtils;
 
 import java.util.HashMap;
@@ -36,9 +37,9 @@ import java.util.Map;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
+    public static final String TAG = MainActivity.class.getSimpleName();
     private static final String SELECTED_ITEM_ID = "selected_item_id";
     private static final String FIRST_TIME = "first_time";
-    private static final String TAG = MainActivity.class.getSimpleName();
     private static Map<Integer, String> fragmentMap;
     private DrawerLayout mDrawerLayout;
     private ActionBarDrawerToggle mDrawerToggle;
@@ -252,8 +253,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     @Override
     protected void onPause() {
-        Log.e(TAG, "onPause:");
+        Log.e(TAG, "main: onPause ---");
         gcmHelper.onPause(this);
+        DowDownloadManager.getInstance(this).onPause(this);
         super.onPause();
     }
 
@@ -274,8 +276,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     @Override
     protected void onResume() {
         super.onResume();
-        Log.e(TAG, "onResume:");
+        Log.e(TAG, "onResume: main");
         gcmHelper.onResume(this);
+        DowDownloadManager.getInstance(this).onResume(this);
     }
 
     @Override
