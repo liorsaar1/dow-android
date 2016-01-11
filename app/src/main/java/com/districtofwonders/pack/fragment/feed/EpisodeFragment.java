@@ -1,20 +1,20 @@
 package com.districtofwonders.pack.fragment.feed;
 
-import android.app.DownloadManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.WebView;
 import android.widget.TextView;
 
+import com.districtofwonders.pack.MainActivity;
 import com.districtofwonders.pack.R;
 import com.districtofwonders.pack.util.DateUtils;
 import com.districtofwonders.pack.util.DowDownloadManager;
@@ -25,6 +25,7 @@ import java.util.Map;
 
 public class EpisodeFragment extends Fragment {
 
+    private static final String TAG = MainActivity.TAG; //EpisodeFragment.class.getSimpleName();
     public static final String ARG_PAGE_NUMBER = "ARG_PAGE_NUMBER";
     private static final String ARG_FEED_ITEM = "ARG_FEED_ITEM";
 
@@ -38,6 +39,7 @@ public class EpisodeFragment extends Fragment {
     private BroadcastReceiver mDownloadCompleteReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
+            Log.e(TAG, "episode: onReceive: <<<");
             updateButtons(context);
         }
     };
@@ -97,10 +99,6 @@ public class EpisodeFragment extends Fragment {
 
         // update buttons state
         updateButtons(getActivity());
-
-        // register the receiver
-        IntentFilter downloadCompleteIntentFilter = new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE);
-        getActivity().registerReceiver(mDownloadCompleteReceiver, downloadCompleteIntentFilter);
         return root;
     }
 
@@ -113,7 +111,7 @@ public class EpisodeFragment extends Fragment {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
                     enqueueRequest(context, mPageNumber, url, title);
-                }
+    }
             });
         }
         enqueueRequest(context, mPageNumber, url, title);
@@ -164,5 +162,20 @@ public class EpisodeFragment extends Fragment {
         // downloaded - play local file
         Uri uri = DowDownloadManager.getDownloadUri(url);
         ViewUtils.playLocalAudio(context, context.getString(R.string.choose_player), uri);
+    }
+
+    @Override
+    public void onPause() {
+        Log.e(TAG, "episode: onPause: ---");
+        getActivity().unregisterReceiver(mDownloadCompleteReceiver);
+        super.onPause();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        Log.e(TAG, "episode: onResume: +++  " + mDownloadCompleteReceiver);
+        getActivity().registerReceiver(mDownloadCompleteReceiver, DowDownloadManager.getDownloadCompleteIntentFilter());
+        updateButtons(getActivity());
     }
 }

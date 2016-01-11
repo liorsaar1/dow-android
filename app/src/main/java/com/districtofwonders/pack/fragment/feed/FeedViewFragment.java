@@ -1,10 +1,8 @@
 package com.districtofwonders.pack.fragment.feed;
 
-import android.app.DownloadManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.res.Resources;
 import android.os.Bundle;
 import android.os.Handler;
@@ -45,8 +43,8 @@ import javax.xml.parsers.ParserConfigurationException;
  * Created by liorsaar on 2015-12-16
  */
 public class FeedViewFragment extends Fragment {
+    private static final String TAG = MainActivity.TAG; //FeedViewFragment.class.getSimpleName();
     public static final String ARG_PAGE_NUMBER = "ARG_PAGE_NUMBER";
-    private static final String TAG = FeedViewFragment.class.getSimpleName();
     private FeedRecyclerAdapter mFeedRecyclerAdapter;
     private SwipeRefreshLayout mSwipeRefreshLayout;
     private int mPageNumber;
@@ -59,6 +57,7 @@ public class FeedViewFragment extends Fragment {
     private BroadcastReceiver mDownloadCompleteReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
+            Log.e(TAG, "feedview: onReceive: <<<");
             mFeedRecyclerAdapter.notifyDataSetChanged();
         }
     };
@@ -114,10 +113,6 @@ public class FeedViewFragment extends Fragment {
         mRecyclerView.setAdapter(mFeedRecyclerAdapter);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
 
-        // register the receiver
-        IntentFilter downloadCompleteIntentFilter = new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE);
-        getActivity().registerReceiver(mDownloadCompleteReceiver, downloadCompleteIntentFilter);
-
         return root;
     }
 
@@ -125,6 +120,20 @@ public class FeedViewFragment extends Fragment {
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         load();
+    }
+
+    @Override
+    public void onPause() {
+        Log.e(TAG, "feedview: onPause: ---");
+        getActivity().unregisterReceiver(mDownloadCompleteReceiver);
+        super.onPause();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        Log.e(TAG, "feedview: onResume: +++  " + mDownloadCompleteReceiver);
+        getActivity().registerReceiver(mDownloadCompleteReceiver, DowDownloadManager.getDownloadCompleteIntentFilter());
     }
 
     private void load() {
