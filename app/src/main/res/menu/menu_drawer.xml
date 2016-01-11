@@ -10,15 +10,15 @@
         android:id="@+id/drawer_nav_patreon"
         android:title="@string/drawer_nav_patreon"/>
     <item
+        android:id="@+id/drawer_nav_notifications"
+        android:title="@string/drawer_nav_notifications"/>
+    <!--
+    <item
         android:id="@+id/drawer_nav_sofanaut"
         android:title="@string/drawer_nav_sofanaut"/>
     <item
-        android:id="@+id/drawer_nav_notifications"
-        android:title="@string/drawer_nav_notifications"/>
-    <item
         android:id="@+id/drawer_nav_shop"
         android:title="@string/drawer_nav_shop"/>
-    <!--
     <item
         android:id="@+id/drawer_nav_help"
         android:title="@string/drawer_nav_help"/>

@@ -15,6 +15,7 @@ import android.preference.PreferenceManager;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -52,6 +53,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     public static void setChildFragment(FragmentActivity activity, Fragment fragment) {
+        activity.getSupportFragmentManager().popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
         activity.getSupportFragmentManager()
                 .beginTransaction()
                 .addToBackStack(fragment.getClass().getName())
@@ -156,6 +158,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     public static void setRootFragment(FragmentActivity activity, String className) {
         Fragment fragment = Fragment.instantiate(activity, className);
+        activity.getSupportFragmentManager().popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
         activity.getSupportFragmentManager()
                 .beginTransaction()
                 .replace(R.id.main_content, fragment)
@@ -169,8 +172,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         fragmentMap.put(R.id.drawer_nav_notifications, NotificationsFragment.class.getName());
         fragmentMap.put(R.id.drawer_nav_patreon, PatreonFragment.class.getName());
         //fragmentMap.put(R.id.drawer_nav_help, AboutFragment.class.getName());
-        fragmentMap.put(R.id.drawer_nav_shop, AboutFragment.class.getName());
-        fragmentMap.put(R.id.drawer_nav_sofanaut, AboutFragment.class.getName());
+        //fragmentMap.put(R.id.drawer_nav_shop, AboutFragment.class.getName());
+        //fragmentMap.put(R.id.drawer_nav_sofanaut, AboutFragment.class.getName());
         fragmentMap.put(R.id.drawer_nav_newsletter, AboutFragment.class.getName());
     }
 
@@ -194,6 +197,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private void setFeedsFragment(String topic) {
         mDrawerLayout.closeDrawer(GravityCompat.START);
         Fragment feedsFragment = FeedsFragment.newInstance(topic);
+        getSupportFragmentManager().popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
         getSupportFragmentManager()
                 .beginTransaction()
                 .addToBackStack(FeedsFragment.class.getName())
