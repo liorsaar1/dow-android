@@ -62,11 +62,22 @@
 
             <com.districtofwonders.pack.widgets.FontAwesomeTextView
                 android:layout_marginRight="14dip"
+                android:id="@+id/episodeDelete"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom"
+                android:layout_weight="0.03"
+                android:text="trash-o"
+                android:textColor="@color/episode_header_text"
+                android:textSize="28sp"/>
+
+            <com.districtofwonders.pack.widgets.FontAwesomeTextView
+                android:layout_marginRight="14dip"
                 android:id="@+id/episodeDownload"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="bottom|right"
-                android:layout_weight="0.05"
+                android:layout_gravity="bottom"
+                android:layout_weight="0.03"
                 android:text="fa-download"
                 android:textColor="@color/episode_header_text"
                 android:textSize="28sp"/>
@@ -75,8 +86,7 @@
                 android:id="@+id/episodePlay"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="bottom|right"
-                android:layout_weight="0.05"
+                android:layout_gravity="bottom"
                 android:text="play-circle-o"
                 android:textColor="@color/episode_header_text"
                 android:textSize="32sp"/>

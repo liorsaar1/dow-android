@@ -26,13 +26,14 @@ import java.util.Map;
 public class EpisodeFragment extends Fragment {
 
     private static final String TAG = MainActivity.TAG; //EpisodeFragment.class.getSimpleName();
-    public static final String ARG_PAGE_NUMBER = "ARG_PAGE_NUMBER";
+    private static final String ARG_PAGE_NUMBER = "ARG_PAGE_NUMBER";
     private static final String ARG_FEED_ITEM = "ARG_FEED_ITEM";
 
     private Map<String, String> mFeedItem;
     private int mPageNumber;
     private TextView mEpisodePlay;
     private TextView mEpisodeDownload;
+    private TextView mEpisodeDelete;
     /**
      * when a download is completed - update the play/download buttons state
      */
@@ -92,6 +93,13 @@ public class EpisodeFragment extends Fragment {
                 onClickDownload(getActivity());
             }
         });
+        mEpisodeDelete = (TextView) root.findViewById(R.id.episodeDelete);
+        mEpisodeDelete.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                onClickDelete(getActivity());
+            }
+        });
         // show notes
         String content = mFeedItem.get(FeedParser.Tags.CONTENT_ENCODED);
         WebView webView = (WebView) root.findViewById(R.id.episodeShowNotes);
@@ -102,7 +110,11 @@ public class EpisodeFragment extends Fragment {
         return root;
     }
 
-    // enqueue a download request
+    /**
+     * enqueue a download request
+     *
+     * @param context
+     */
     private void onClickDownload(final Context context) {
         final String url = mFeedItem.get(FeedParser.Keys.ENCLOSURE_URL);
         final String title = mFeedItem.get(FeedParser.Tags.TITLE);
@@ -111,7 +123,7 @@ public class EpisodeFragment extends Fragment {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
                     enqueueRequest(context, mPageNumber, url, title);
-    }
+                }
             });
         }
         enqueueRequest(context, mPageNumber, url, title);
@@ -127,24 +139,33 @@ public class EpisodeFragment extends Fragment {
      */
     private void updateButtons(Context context) {
         String url = mFeedItem.get(FeedParser.Keys.ENCLOSURE_URL);
+        int textColor = context.getResources().getColor(R.color.episode_header_text);
+        int greyOut = context.getResources().getColor(R.color.colorTextSecondary);
+        int accentColor = context.getResources().getColor(R.color.colorAccent);
+
         // no url - remove buttons
         if (url == null) {
             mEpisodePlay.setVisibility(View.INVISIBLE);
             mEpisodeDownload.setVisibility(View.INVISIBLE);
+            mEpisodeDelete.setVisibility(View.INVISIBLE);
             return;
         }
         // download button - invisible if file was already downloaded or is downloading
         boolean isDownloaded = DowDownloadManager.getInstance(context).isDownloaded(url);
         boolean isDownloadInProgress = DowDownloadManager.getInstance(context).isDownloadInProgress(url);
         if (isDownloaded || isDownloadInProgress) {
-            int greyOut = context.getResources().getColor(R.color.colorTextSecondary);
             mEpisodeDownload.setTextColor(greyOut);
             mEpisodeDownload.setEnabled(false);
+        } else {
+            mEpisodeDownload.setTextColor(textColor);
+            mEpisodeDownload.setEnabled(true);
         }
         // play button - highlighted if download completed
-        if (isDownloaded) {
-            mEpisodePlay.setTextColor(context.getResources().getColor(R.color.colorAccent));
-        }
+        int playColor = isDownloaded ? accentColor : textColor;
+        mEpisodePlay.setTextColor(playColor);
+        // delete button
+        int deleteVisibility = isDownloaded ? View.VISIBLE : View.INVISIBLE;
+        mEpisodeDelete.setVisibility(deleteVisibility);
     }
 
     private void onClickPlay(Context context) {
@@ -164,11 +185,15 @@ public class EpisodeFragment extends Fragment {
         ViewUtils.playLocalAudio(context, context.getString(R.string.choose_player), uri);
     }
 
-    @Override
-    public void onPause() {
-        Log.e(TAG, "episode: onPause: ---");
-        getActivity().unregisterReceiver(mDownloadCompleteReceiver);
-        super.onPause();
+    private void onClickDelete(final Context context) {
+        final String url = mFeedItem.get(FeedParser.Keys.ENCLOSURE_URL);
+        ViewUtils.showDeleteWarning(context, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                DowDownloadManager.delete(url);
+                updateButtons(context);
+            }
+        });
     }
 
     @Override
@@ -177,5 +202,12 @@ public class EpisodeFragment extends Fragment {
         Log.e(TAG, "episode: onResume: +++  " + mDownloadCompleteReceiver);
         getActivity().registerReceiver(mDownloadCompleteReceiver, DowDownloadManager.getDownloadCompleteIntentFilter());
         updateButtons(getActivity());
+    }
+
+    @Override
+    public void onPause() {
+        Log.e(TAG, "episode: onPause: ---");
+        getActivity().unregisterReceiver(mDownloadCompleteReceiver);
+        super.onPause();
     }
 }

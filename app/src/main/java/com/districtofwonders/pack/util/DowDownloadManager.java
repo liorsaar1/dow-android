@@ -88,9 +88,7 @@ public class DowDownloadManager {
     }
 
     public static Uri getDownloadUri(String url) {
-        File path = Environment.getExternalStoragePublicDirectory(getDownloadDirectory());
-        File file = new File(path, getFilename(url));
-        return Uri.fromFile(file);
+        return Uri.fromFile(getFile(url));
     }
 
     private static String getFilename(String url) {
@@ -133,10 +131,18 @@ public class DowDownloadManager {
         return fileExists(url);
     }
 
-    private boolean fileExists(String url) {
+    private static boolean fileExists(String url) {
+        return getFile(url).exists();
+    }
+
+    public static boolean delete(String url) {
+        return getFile(url).delete();
+    }
+
+    private static File getFile(String url) {
         File path = Environment.getExternalStoragePublicDirectory(getDownloadDirectory());
-        File file = new File(path, getFilename(url));
-        return file.exists();
+        String filename = getFilename(url);
+        return new File(path, filename);
     }
 
     public boolean isDownloadInProgress(String url) {
