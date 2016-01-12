@@ -25,6 +25,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import com.districtofwonders.pack.fragment.AboutFragment;
+import com.districtofwonders.pack.fragment.news.NewsletterListFragment;
 import com.districtofwonders.pack.fragment.NotificationsFragment;
 import com.districtofwonders.pack.fragment.PatreonFragment;
 import com.districtofwonders.pack.fragment.feed.FeedsFragment;
@@ -107,7 +108,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         // topics map from prefs
         Map<String, Boolean> topicsMap = NotificationsFragment.getRegistrationMap(this);
         // progress
-        final ProgressDialog progressDialog = ProgressDialog.show(activity, "Contacting Notification Server", "Please Wait...", true);
+        final ProgressDialog progressDialog = ProgressDialog.show(activity, getString(R.string.please_wait), getString(R.string.contacting_notification_server), true);
         // start the background service
         gcmHelper = new GcmHelper(activity, topicsMap, new GcmHelper.RegistrationListener() {
 
@@ -171,7 +172,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         //fragmentMap.put(R.id.drawer_nav_help, AboutFragment.class.getName());
         fragmentMap.put(R.id.drawer_nav_shop, AboutFragment.class.getName());
         fragmentMap.put(R.id.drawer_nav_sofanaut, AboutFragment.class.getName());
-        fragmentMap.put(R.id.drawer_nav_newsletter, AboutFragment.class.getName());
+        fragmentMap.put(R.id.drawer_nav_newsletter, NewsletterListFragment.class.getName());
     }
 
     @Override
@@ -182,9 +183,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     private void handleNotification(Intent intent) {
         String from = intent.getStringExtra(GcmHelper.NOTIFICATION_FROM);
-        // global notification - should probably launch a url
+        // global notification - used for newsletter for now
         if (from.startsWith(FeedsFragment.FEED_TOPICS_GLOBAL)) {
-            handleNotificationGlobal(intent);
+            setFragment(R.id.drawer_nav_newsletter);
             return;
         }
         // feed notification

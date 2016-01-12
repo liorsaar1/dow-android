@@ -7,11 +7,7 @@
 
     <TextView
         android:id="@+id/feed_view_error"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerInParent="true"
-        android:text="Error"
-        android:textSize="36sp"/>
+        style="@style/ListContentError"/>
 
     <android.support.v4.widget.SwipeRefreshLayout
         android:id="@+id/feed_view_swipe"
