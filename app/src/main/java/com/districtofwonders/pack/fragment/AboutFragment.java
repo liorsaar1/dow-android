@@ -10,6 +10,7 @@ import android.widget.TextView;
 
 import com.districtofwonders.pack.BuildConfig;
 import com.districtofwonders.pack.R;
+import com.districtofwonders.pack.util.ViewUtils;
 
 public class AboutFragment extends Fragment {
 
@@ -23,6 +24,25 @@ public class AboutFragment extends Fragment {
         ViewGroup root = (ViewGroup) inflater.inflate(R.layout.about_fragment, null);
         String version = "Version " + BuildConfig.VERSION_NAME + " - " + BuildConfig.VERSION_CODE;
         ((TextView) root.findViewById(R.id.aboutVersion)).setText(version);
+
+        root.findViewById(R.id.aboutSSS).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ViewUtils.openBrowser(getActivity(), "http://www.starshipsofa.com/staff/");
+            }
+        });
+        root.findViewById(R.id.aboutTTT).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ViewUtils.openBrowser(getActivity(), "http://talestoterrify.com/staff/");
+            }
+        });
+        root.findViewById(R.id.aboutFFF).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ViewUtils.openBrowser(getActivity(), "http://farfetchedfables.com/staff/");
+            }
+        });
         return root;
     }
 

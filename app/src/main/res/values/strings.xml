@@ -46,5 +46,6 @@
     <string name="server_error">Server Error</string>
     <string name="newsletters">Newsletters</string>
     <string name="contacting_notification_server">Contacting Notification Server</string>
+    <string name="everyone_dow">Everyone has a story in the District of Wonders, come and find yours.</string>
 
 </resources>

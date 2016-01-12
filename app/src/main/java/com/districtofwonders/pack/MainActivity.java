@@ -29,6 +29,7 @@ import com.districtofwonders.pack.fragment.AboutFragment;
 import com.districtofwonders.pack.fragment.NotificationsFragment;
 import com.districtofwonders.pack.fragment.PatreonFragment;
 import com.districtofwonders.pack.fragment.feed.FeedsFragment;
+import com.districtofwonders.pack.fragment.news.NewsletterListFragment;
 import com.districtofwonders.pack.gcm.GcmHelper;
 import com.districtofwonders.pack.util.DowDownloadManager;
 import com.districtofwonders.pack.util.ViewUtils;
@@ -174,7 +175,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         //fragmentMap.put(R.id.drawer_nav_help, AboutFragment.class.getName());
         //fragmentMap.put(R.id.drawer_nav_shop, AboutFragment.class.getName());
         //fragmentMap.put(R.id.drawer_nav_sofanaut, AboutFragment.class.getName());
-        fragmentMap.put(R.id.drawer_nav_newsletter, AboutFragment.class.getName());
+        fragmentMap.put(R.id.drawer_nav_newsletter, NewsletterListFragment.class.getName());
     }
 
     @Override

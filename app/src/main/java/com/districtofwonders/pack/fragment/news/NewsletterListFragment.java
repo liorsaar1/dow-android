@@ -138,7 +138,7 @@ public class NewsletterListFragment extends Fragment {
         List<Map<String, String>> list = new ArrayList<>();
         list.add(new HashMap<String, String>() {{
             put("title", "January 11, 2016");
-            put("url", "feed/2016-01-11.html");
+            put("url", "feed/content.html");
         }});
         list.add(new HashMap<String, String>() {{
             put("title", "January 10, 2016");
