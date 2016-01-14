@@ -232,4 +232,11 @@ public class ViewUtils {
         viewIntent.setDataAndType(uri, "audio/*");
         context.startActivity(Intent.createChooser(viewIntent, title));
     }
+
+    public static void openBrowser(Context context, String url) {
+        Intent intent = new Intent(Intent.ACTION_VIEW);
+        Uri uri = Uri.parse(url);
+        intent.setData(uri);
+        context.startActivity(intent);
+    }
 }

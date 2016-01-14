@@ -189,14 +189,14 @@ public class FeedViewFragment extends Fragment {
 
     private void setError(VolleyError volleyError) {
         String statusCode = (volleyError.networkResponse != null) ? ""+volleyError.networkResponse.statusCode : "";
-        String message = "Server Error " + statusCode;
+        String message = getActivity().getString(R.string.server_error) + " " + statusCode;
         setError(message);
     }
 
     private void setError(String message) {
         // in production - do not show detailed error
         if (!BuildConfig.DEBUG) {
-            message = "Server Error";
+            message = getActivity().getString(R.string.server_error);
         }
         mError.setVisibility(View.VISIBLE);
         mError.setText(message);

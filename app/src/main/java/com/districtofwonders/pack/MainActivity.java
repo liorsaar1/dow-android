@@ -6,6 +6,7 @@ package com.districtofwonders.pack;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
@@ -15,6 +16,7 @@ import android.preference.PreferenceManager;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -28,6 +30,7 @@ import com.districtofwonders.pack.fragment.AboutFragment;
 import com.districtofwonders.pack.fragment.NotificationsFragment;
 import com.districtofwonders.pack.fragment.PatreonFragment;
 import com.districtofwonders.pack.fragment.feed.FeedsFragment;
+import com.districtofwonders.pack.fragment.news.NewsletterListFragment;
 import com.districtofwonders.pack.gcm.GcmHelper;
 import com.districtofwonders.pack.util.DowDownloadManager;
 import com.districtofwonders.pack.util.ViewUtils;
@@ -52,6 +55,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     public static void setChildFragment(FragmentActivity activity, Fragment fragment) {
+        activity.getSupportFragmentManager().popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
         activity.getSupportFragmentManager()
                 .beginTransaction()
                 .addToBackStack(fragment.getClass().getName())
@@ -85,7 +89,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         } else {
             hideDrawer();
         }
-        mSelectedId = savedInstanceState == null ? R.id.drawer_nav_feed : savedInstanceState.getInt(SELECTED_ITEM_ID);
+        if (savedInstanceState == null) {
+            mSelectedId = getNavSelection(this);
+        } else {
+            mSelectedId = savedInstanceState.getInt(SELECTED_ITEM_ID);
+        }
         navigate(mSelectedId);
 
         // gcm notifications handler
@@ -98,16 +106,23 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
     }
 
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        mDrawerToggle.onConfigurationChanged(newConfig);
+    }
+
     /**
      * handle all GCM setup
      * get the topics map from the prefs, and register them to gcm
+     *
      * @param activity - the parent activity to be invoked when a notification comes in
      */
     private void initGcmHelper(final Activity activity) {
         // topics map from prefs
         Map<String, Boolean> topicsMap = NotificationsFragment.getRegistrationMap(this);
         // progress
-        final ProgressDialog progressDialog = ProgressDialog.show(activity, "Contacting Notification Server", "Please Wait...", true);
+        final ProgressDialog progressDialog = ProgressDialog.show(activity, getString(R.string.please_wait), getString(R.string.contacting_notification_server), true);
         // start the background service
         gcmHelper = new GcmHelper(activity, topicsMap, new GcmHelper.RegistrationListener() {
 
@@ -145,23 +160,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         mDrawerLayout.closeDrawer(GravityCompat.START);
     }
 
-    private void navigate(int selectedId) {
-        mDrawerLayout.closeDrawer(GravityCompat.START);
-        setFragment(selectedId);
-    }
-
-    private void setFragment(int navId) {
-        setRootFragment(this, fragmentMap.get(navId));
-    }
-
-    public static void setRootFragment(FragmentActivity activity, String className) {
-        Fragment fragment = Fragment.instantiate(activity, className);
-        activity.getSupportFragmentManager()
-                .beginTransaction()
-                .replace(R.id.main_content, fragment)
-                .commit();
-    }
-
     private void initFragments() {
         fragmentMap = new HashMap<>();
         fragmentMap.put(R.id.drawer_nav_feed, FeedsFragment.class.getName());
@@ -169,36 +167,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         fragmentMap.put(R.id.drawer_nav_notifications, NotificationsFragment.class.getName());
         fragmentMap.put(R.id.drawer_nav_patreon, PatreonFragment.class.getName());
         //fragmentMap.put(R.id.drawer_nav_help, AboutFragment.class.getName());
-        fragmentMap.put(R.id.drawer_nav_shop, AboutFragment.class.getName());
-        fragmentMap.put(R.id.drawer_nav_sofanaut, AboutFragment.class.getName());
-        fragmentMap.put(R.id.drawer_nav_newsletter, AboutFragment.class.getName());
-    }
-
-    @Override
-    public void onConfigurationChanged(Configuration newConfig) {
-        super.onConfigurationChanged(newConfig);
-        mDrawerToggle.onConfigurationChanged(newConfig);
-    }
-
-    private void handleNotification(Intent intent) {
-        String from = intent.getStringExtra(GcmHelper.NOTIFICATION_FROM);
-        // global notification - should probably launch a url
-        if (from.startsWith(FeedsFragment.FEED_TOPICS_GLOBAL)) {
-            handleNotificationGlobal(intent);
-            return;
-        }
-        // feed notification
-        setFeedsFragment(from);
-    }
-
-    private void setFeedsFragment(String topic) {
-        mDrawerLayout.closeDrawer(GravityCompat.START);
-        Fragment feedsFragment = FeedsFragment.newInstance(topic);
-        getSupportFragmentManager()
-                .beginTransaction()
-                .addToBackStack(FeedsFragment.class.getName())
-                .replace(R.id.main_content, feedsFragment)
-                .commit();
+        //fragmentMap.put(R.id.drawer_nav_shop, AboutFragment.class.getName());
+        //fragmentMap.put(R.id.drawer_nav_sofanaut, AboutFragment.class.getName());
+        fragmentMap.put(R.id.drawer_nav_newsletter, NewsletterListFragment.class.getName());
     }
 
     private void handleNotificationGlobal(Intent intent) {
@@ -242,6 +213,24 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         return true;
     }
 
+    private void navigate(int selectedId) {
+        mDrawerLayout.closeDrawer(GravityCompat.START);
+        setFragment(selectedId);
+    }
+
+    private void setFragment(int navId) {
+        setRootFragment(this, fragmentMap.get(navId));
+    }
+
+    public static void setRootFragment(FragmentActivity activity, String className) {
+        Fragment fragment = Fragment.instantiate(activity, className);
+        activity.getSupportFragmentManager().popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
+        activity.getSupportFragmentManager()
+                .beginTransaction()
+                .replace(R.id.main_content, fragment)
+                .commit();
+    }
+
     @Override
     public void onBackPressed() {
         if (mDrawerLayout.isDrawerOpen(GravityCompat.START)) {
@@ -256,7 +245,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         Log.e(TAG, "main: onPause ---");
         gcmHelper.onPause(this);
         DowDownloadManager.getInstance(this).onPause(this);
+        setNavSelection(this, mSelectedId);
         super.onPause();
+    }
+
+    private void setNavSelection(Context context, int value) {
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+        sharedPreferences.edit().putInt(SELECTED_ITEM_ID, value).apply();
     }
 
     @Override
@@ -273,6 +268,28 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         handleNotification(intent);
     }
 
+    private void handleNotification(Intent intent) {
+        String from = intent.getStringExtra(GcmHelper.NOTIFICATION_FROM);
+        // global notification - used for newsletter for now
+        if (from.startsWith(FeedsFragment.FEED_TOPICS_GLOBAL)) {
+            setFragment(R.id.drawer_nav_newsletter);
+            return;
+        }
+        // feed notification
+        setFeedsFragment(from);
+    }
+
+    private void setFeedsFragment(String topic) {
+        mDrawerLayout.closeDrawer(GravityCompat.START);
+        Fragment feedsFragment = FeedsFragment.newInstance(topic);
+        getSupportFragmentManager().popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
+        getSupportFragmentManager()
+                .beginTransaction()
+                .addToBackStack(FeedsFragment.class.getName())
+                .replace(R.id.main_content, feedsFragment)
+                .commit();
+    }
+
     @Override
     protected void onResume() {
         super.onResume();
@@ -285,5 +302,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putInt(SELECTED_ITEM_ID, mSelectedId);
+    }
+
+    private int getNavSelection(Context context) {
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+        return sharedPreferences.getInt(SELECTED_ITEM_ID, R.id.drawer_nav_feed);
     }
 }

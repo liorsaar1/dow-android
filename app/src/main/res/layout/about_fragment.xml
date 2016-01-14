@@ -1,28 +1,72 @@
-<LinearLayout
+<RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="#000000"
-    android:orientation="vertical">
+    android:layout_height="match_parent">
 
-    <TextView
-        android:layout_margin="10dip"
-        android:id="@+id/aboutVersion"
-        android:textSize="20sp"
-        android:textColor="#ffffff"
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center_horizontal"
-        android:text="Version 1.0 - 1"/>
+        android:layout_height="match_parent"
+        android:background="#000000"
+        android:orientation="vertical"
+        android:weightSum="1">
 
-    <TextView
-        android:layout_margin="40dip"
-        android:textSize="40sp"
-        android:textColor="#ffffff"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal|center_vertical"
-        android:text="Everyone has a story in the District of Wonders, come and find yours."/>
-</LinearLayout>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dip"
+            android:layout_weight="0.8"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="20dip"
+                android:gravity="center"
+                android:text="@string/everyone_dow"
+                android:textColor="#ffffff"
+                android:textSize="20sp"/>
+
+            <ImageView
+                android:id="@+id/aboutSSS"
+                android:layout_width="match_parent"
+                android:layout_height="70dip"
+                android:layout_marginBottom="10dip"
+                android:src="@drawable/sss_logo"/>
+
+            <ImageView
+                android:id="@+id/aboutFFF"
+                android:layout_width="match_parent"
+                android:layout_height="80dip"
+                android:layout_marginBottom="10dip"
+                android:src="@drawable/fff_logo"/>
+
+            <ImageView
+                android:id="@+id/aboutTTT"
+                android:layout_width="match_parent"
+                android:layout_height="90dip"
+                android:src="@drawable/ttt_logo"/>
+
+        </LinearLayout>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="0dip"
+            android:layout_weight="0.1"
+            android:gravity="center_horizontal"
+            android:text="App Development:\nLior Saar / Clearsight Studio"
+            android:textColor="#ffffff"
+            android:textSize="20sp"/>
+
+        <TextView
+            android:id="@+id/aboutVersion"
+            android:layout_width="match_parent"
+            android:layout_height="0dip"
+            android:layout_weight="0.1"
+            android:gravity="center_horizontal"
+            android:text="Version 1.0 - 1"
+            android:textColor="#ffffff"
+            android:textSize="14sp"/>
+
+    </LinearLayout>
+</RelativeLayout>

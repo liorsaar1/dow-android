@@ -15,7 +15,7 @@
         }
       },
       "oauth_client": [],
-      "api_key": ["AIzaSyAfBvnry23IJJUJW5OQHrF4AaBgn78NYvc"],
+      "api_key": ["$PRODUCTION_API_KEY$"],
       "services": {
         "analytics_service": {
           "status": 1
