@@ -43,6 +43,14 @@ public class AboutFragment extends Fragment {
                 ViewUtils.openBrowser(getActivity(), "http://farfetchedfables.com/staff/");
             }
         });
+        root.findViewById(R.id.aboutCredits).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ViewUtils.openBrowser(getActivity(), "https://clearsightstudio.com/");
+            }
+        });
+
+
         return root;
     }
 

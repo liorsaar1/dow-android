@@ -47,5 +47,7 @@
     <string name="newsletters">Newsletters</string>
     <string name="contacting_notification_server">Contacting Notification Server</string>
     <string name="everyone_dow">Everyone has a story in the District of Wonders, come and find yours.</string>
+    <string name="staff_underline"><u>Staff</u></string>
+    <string name="lior_saar"><u>Lior Saar @ Clearsight Studio</u></string>
 
 </resources>

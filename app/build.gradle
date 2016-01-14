@@ -9,8 +9,8 @@ android {
         applicationId "com.districtofwonders.pack"
         minSdkVersion 14
         targetSdkVersion 22
-        versionCode 5
-        versionName "0.22"
+        versionCode 6
+        versionName "0.23"
         setProperty("archivesBaseName", "dow-android-$versionName")
     }
     buildTypes {
