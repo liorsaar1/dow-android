@@ -41,4 +41,14 @@
         <item name="android:textSize">36sp</item>
     </style>
 
+    <style name="AboutStaff">
+        <item name="android:layout_marginBottom">14dip</item>
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_gravity">center_horizontal</item>
+        <item name="android:textColor">@color/colorAccent</item>
+        <item name="android:textSize">12sp</item>
+        <item name="android:text">@string/staff_underline</item>
+    </style>
+
 </resources>
