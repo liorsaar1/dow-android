@@ -62,7 +62,7 @@ public class FeedParser extends DomParser {
         public static final String ENCLOSURE = "enclosure";
     }
 
-    class Tags {
+    public class Tags {
         public static final String TITLE = "title";
         public static final String LINK = "link";
         public static final String PUB_DATE = "pubDate";
@@ -71,7 +71,7 @@ public class FeedParser extends DomParser {
         public static final String CONTENT_ENCODED = "content:encoded";
     }
 
-    class Keys {
+    public class Keys {
         public static final String ENCLOSURE_URL = "enclosure.url";
     }
 }

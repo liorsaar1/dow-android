@@ -33,7 +33,6 @@ import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.List;
 import java.util.Map;
 
@@ -298,10 +297,7 @@ class FeedRecyclerAdapter extends RecyclerView.Adapter<FeedRecyclerAdapter.FeedR
 
     private String getPubDate(int position) {
         String pubDateString = list.get(position).get(FeedParser.Tags.PUB_DATE);
-        Calendar cal = DateUtils.getPubDateCal(pubDateString);
-        String month = DateUtils.getMonthString(cal);
-        String day = DateUtils.getDayString(cal);
-        return month +"\n" + day;
+        return DateUtils.getMmDd(pubDateString);
     }
 
     private String getDuration(int position) {

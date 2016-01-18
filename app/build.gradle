@@ -9,8 +9,8 @@ android {
         applicationId "com.districtofwonders.pack"
         minSdkVersion 14
         targetSdkVersion 22
-        versionCode 6
-        versionName "0.23"
+        versionCode 7
+        versionName "0.24"
         setProperty("archivesBaseName", "dow-android-$versionName")
     }
     buildTypes {
@@ -30,5 +30,5 @@ dependencies {
     compile 'com.android.support:appcompat-v7:22.2.0'
     compile 'com.android.support:design:22.2.0'
     compile 'com.android.support:recyclerview-v7:22.2.0'
-    compile 'com.mcxiaoke.volley:library:1.0.+'
+    compile 'com.mcxiaoke.volley:library:1.0.19'
 }

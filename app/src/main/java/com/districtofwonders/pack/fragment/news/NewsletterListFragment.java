@@ -25,12 +25,18 @@ import com.districtofwonders.pack.BuildConfig;
 import com.districtofwonders.pack.DowSingleton;
 import com.districtofwonders.pack.MainActivity;
 import com.districtofwonders.pack.R;
+import com.districtofwonders.pack.fragment.feed.FeedParser;
+import com.districtofwonders.pack.util.DateUtils;
+import com.districtofwonders.pack.util.ViewUtils;
+
+import org.xml.sax.SAXException;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import javax.xml.parsers.ParserConfigurationException;
 
 public class NewsletterListFragment extends Fragment {
     private static final String TAG = MainActivity.TAG;
@@ -44,14 +50,12 @@ public class NewsletterListFragment extends Fragment {
         @Override
         public void onClick(int position) {
             //Toast.makeText(getActivity(), mList.get(position).get("url"), Toast.LENGTH_LONG).show();
-            MainActivity.setChildFragment(getActivity(), NewsletterFragment.newInstance(mList.get(position).get("url")));
+            MainActivity.setChildFragment(getActivity(), NewsletterFragment.newInstance(mList.get(position)));
         }
     };
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        final String url = getActivity().getString(R.string.link_newsletter);
-
         View view = inflater.inflate(R.layout.newsletter_list_fragment, container, false);
         mError = (TextView) view.findViewById(R.id.newsletterError);
         mSwipeRefreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.newsletterSwipe);
@@ -59,6 +63,7 @@ public class NewsletterListFragment extends Fragment {
             @Override
             public void onRefresh() {
                 clearData();
+                String url = getActivity().getString(R.string.link_newsletter);
                 load(url);
             }
         });
@@ -68,15 +73,30 @@ public class NewsletterListFragment extends Fragment {
         mRecyclerView.setAdapter(mNewsletterRecyclerAdapter);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
 
-        load(url);
-
         return view;
+    }
+
+    @Override
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        String url = getActivity().getString(R.string.link_newsletter);
+        load(url);
     }
 
     private void load(String url) {
         mError.setVisibility(View.GONE);
         if (mList.size() != 0) {
             mNewsletterRecyclerAdapter.setData(mList);
+            return;
+        }
+        // DEBUG - read an xml
+        if (false) {
+            try {
+                String xmlString = ViewUtils.getAssetAsString(getActivity(), "newsletter/newsletter_feed.xml");
+                setData(xmlString);
+            } catch (Exception e) {
+                setError(e.getMessage());
+            }
             return;
         }
 
@@ -126,25 +146,13 @@ public class NewsletterListFragment extends Fragment {
         mError.setText(message);
     }
 
-    private void setData(String htmlString) throws IOException {
+    private void setData(String xmlString) throws IOException, ParserConfigurationException, SAXException {
         if (BuildConfig.DEBUG)
-            Log.e(TAG, htmlString.substring(300, 600));
+            Log.e(TAG, xmlString.substring(300, 600));
 
-        mList = getList(htmlString);
+        FeedParser parser = new FeedParser(xmlString);
+        mList = parser.getItems();
         mNewsletterRecyclerAdapter.setData(mList);
-    }
-
-    private List<Map<String, String>> getList(String htmlString) {
-        List<Map<String, String>> list = new ArrayList<>();
-        list.add(new HashMap<String, String>() {{
-            put("title", "January 11, 2016");
-            put("url", "newsletter/2016-01-11.html");
-        }});
-        list.add(new HashMap<String, String>() {{
-            put("title", "December 14, 2015");
-            put("url", "newsletter/2015-12-14.html");
-        }});
-        return list;
     }
 
     private void clearData() {
@@ -179,6 +187,7 @@ class NewsletterRecyclerAdapter extends RecyclerView.Adapter<NewsletterRecyclerA
 
     @Override
     public void onBindViewHolder(NewsletterRecyclerViewHolder holder, final int position) {
+        holder.pubDate.setText(getPubDate(position));
         holder.title.setText(getTitle(position));
         holder.root.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -189,7 +198,12 @@ class NewsletterRecyclerAdapter extends RecyclerView.Adapter<NewsletterRecyclerA
     }
 
     private String getTitle(int position) {
-        return list.get(position).get("title");
+        return list.get(position).get(FeedParser.Tags.TITLE);
+    }
+
+    private String getPubDate(int position) {
+        String pubDateString = list.get(position).get(FeedParser.Tags.PUB_DATE);
+        return DateUtils.getMmDd(pubDateString);
     }
 
     @Override
@@ -204,10 +218,11 @@ class NewsletterRecyclerAdapter extends RecyclerView.Adapter<NewsletterRecyclerA
     class NewsletterRecyclerViewHolder extends RecyclerView.ViewHolder {
 
         View root;
-        TextView title;
+        TextView title, pubDate;
 
         public NewsletterRecyclerViewHolder(View itemView) {
             super(itemView);
+            pubDate = (TextView) itemView.findViewById(R.id.newsletterItemPubDate);
             title = (TextView) itemView.findViewById(R.id.newsletterItemTitle);
             root = itemView;
         }
