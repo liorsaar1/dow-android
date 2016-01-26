@@ -11,6 +11,7 @@ import android.webkit.WebViewClient;
 import android.widget.ProgressBar;
 
 import com.districtofwonders.pack.R;
+import com.districtofwonders.pack.gcm.AnalyticsHelper;
 
 /**
  * KISS TTM
@@ -52,6 +53,12 @@ public class PatreonFragment extends Fragment {
         public void onReceivedError(WebView view, int errorCode, String description, String failingUrl) {
             super.onReceivedError(view, errorCode, description, failingUrl);
             mProgressBar.setVisibility(View.GONE);
+        }
+
+        @Override
+        public void onLoadResource(WebView view, String url) {
+            AnalyticsHelper.patreonLink(getActivity(), url);
+            super.onLoadResource(view, url);
         }
     }
 }

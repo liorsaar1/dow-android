@@ -19,6 +19,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.districtofwonders.pack.R;
+import com.districtofwonders.pack.gcm.AnalyticsHelper;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -86,6 +87,7 @@ public class FeedsFragment extends Fragment {
         }
 
         String message = data.getString(NOTIFICATION_DATA_MESSAGE);
+        AnalyticsHelper.notificationReceived(context, from, message);
         NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(context)
                 .setSmallIcon(icon)
                 .setLargeIcon(bitmap)
@@ -129,7 +131,7 @@ public class FeedsFragment extends Fragment {
         mTabLayout.setTabsFromPagerAdapter(mAdapter);
         mTabLayout.setupWithViewPager(mPager);
 
-        mPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(mTabLayout));
+        mPager.addOnPageChangeListener(new AnalyticsOnPageChangeListener(mTabLayout));
 
         // display selected page
         Bundle arguments = getArguments();
@@ -138,13 +140,37 @@ public class FeedsFragment extends Fragment {
             if (topic != null) {
                 setFeed(topic);
             }
+        } else {
+            // none selected - screen analytics
+            screen(getActivity(), 0);
         }
         return root;
+    }
+
+    public static void screen(Context context, int pageNumber) {
+        String feedTitle = FeedsFragment.feeds[pageNumber].title;
+        AnalyticsHelper.screen(context, feedTitle);
     }
 
     public void setFeed(String topic) {
         int pageNumber = FeedDesc.getFeedIndex(feeds, topic);
         mPager.setCurrentItem(pageNumber);
+    }
+
+    /**
+     * custom listener, to send analytics for onPageSelected events
+     */
+    class AnalyticsOnPageChangeListener extends TabLayout.TabLayoutOnPageChangeListener {
+
+        public AnalyticsOnPageChangeListener(TabLayout tabLayout) {
+            super(tabLayout);
+        }
+
+        @Override
+        public void onPageSelected(int position) {
+            super.onPageSelected(position);
+            screen(getActivity(), position);
+        }
     }
 }
 

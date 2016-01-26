@@ -26,6 +26,7 @@ import com.districtofwonders.pack.DowSingleton;
 import com.districtofwonders.pack.MainActivity;
 import com.districtofwonders.pack.R;
 import com.districtofwonders.pack.fragment.feed.FeedParser;
+import com.districtofwonders.pack.gcm.AnalyticsHelper;
 import com.districtofwonders.pack.util.DateUtils;
 import com.districtofwonders.pack.util.ViewUtils;
 
@@ -49,7 +50,7 @@ public class NewsletterListFragment extends Fragment {
     private NewsletterRecyclerAdapter.OnClickListener mListener = new NewsletterRecyclerAdapter.OnClickListener() {
         @Override
         public void onClick(int position) {
-            //Toast.makeText(getActivity(), mList.get(position).get("url"), Toast.LENGTH_LONG).show();
+            AnalyticsHelper.viewNewsletter(getActivity(), mList.get(position).get(FeedParser.Tags.PUB_DATE));
             MainActivity.setChildFragment(getActivity(), NewsletterFragment.newInstance(mList.get(position)));
         }
     };

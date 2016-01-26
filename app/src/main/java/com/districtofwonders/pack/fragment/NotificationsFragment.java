@@ -15,6 +15,7 @@ import android.widget.Switch;
 
 import com.districtofwonders.pack.R;
 import com.districtofwonders.pack.fragment.feed.FeedsFragment;
+import com.districtofwonders.pack.gcm.AnalyticsHelper;
 import com.districtofwonders.pack.gcm.GcmHelper;
 import com.districtofwonders.pack.gcm.GcmPreferences;
 import com.districtofwonders.pack.util.ViewUtils;
@@ -127,6 +128,7 @@ public class NotificationsFragment extends Fragment {
     private void onCheckedReceive(final boolean isChecked) {
         Log.e(TAG, "receive:" + isChecked);
         setReceiveNotificationsPref(getActivity(), isChecked);
+        AnalyticsHelper.notificationPrefReceive(getActivity(), isChecked);
 
         final ProgressDialog progressDialog = ProgressDialog.show(getActivity(), getActivity().getString(R.string.please_wait), getActivity().getString(R.string.notifications_updating_preferences), true);
 
@@ -197,6 +199,7 @@ public class NotificationsFragment extends Fragment {
     private void onCheckedTopic(final String topicName, final boolean isChecked) {
         Log.e(TAG, "receive:" + isChecked);
 
+        AnalyticsHelper.notificationPrefTopic(getActivity(), topicName, isChecked);
         final ProgressDialog progressDialog = ProgressDialog.show(getActivity(), getActivity().getString(R.string.please_wait), getActivity().getString(R.string.notifications_updating_preferences), true);
 
         GcmHelper.setSubscription(getActivity(), topicName, isChecked, new GcmHelper.RegistrationListener() {

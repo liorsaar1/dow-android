@@ -14,6 +14,7 @@ import android.util.Log;
 
 import com.districtofwonders.pack.MainActivity;
 import com.districtofwonders.pack.R;
+import com.districtofwonders.pack.gcm.AnalyticsHelper;
 
 import java.io.File;
 import java.util.HashMap;
@@ -70,6 +71,7 @@ public class DowDownloadManager {
             String title = context.getString(R.string.download_completed) + " - " + mDownloadIdMap.get(id).title;
             Uri uri = Uri.parse(downloadedPackageUriString);
             ViewUtils.playLocalAudio(context, title, uri);
+            AnalyticsHelper.downloadCompleted(context, uri);
         }
     };
 

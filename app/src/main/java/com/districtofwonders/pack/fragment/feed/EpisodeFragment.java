@@ -18,6 +18,7 @@ import android.widget.TextView;
 
 import com.districtofwonders.pack.MainActivity;
 import com.districtofwonders.pack.R;
+import com.districtofwonders.pack.gcm.AnalyticsHelper;
 import com.districtofwonders.pack.util.DateUtils;
 import com.districtofwonders.pack.util.DowDownloadManager;
 import com.districtofwonders.pack.util.ViewUtils;
@@ -109,6 +110,8 @@ public class EpisodeFragment extends Fragment {
 
         // update buttons state
         updateButtons(getActivity());
+        // analytics
+        AnalyticsHelper.screen(getActivity(), EpisodeFragment.class.getSimpleName());
         return root;
     }
 
@@ -131,6 +134,7 @@ public class EpisodeFragment extends Fragment {
             return;
         }
         enqueueRequest(context, url, title, desc);
+        AnalyticsHelper.download(context, url);
     }
 
     /**
@@ -209,10 +213,12 @@ public class EpisodeFragment extends Fragment {
         boolean isDownloaded = DowDownloadManager.getInstance(context).isDownloaded(url);
         // not downloaded - stream
         if (!isDownloaded) {
+            AnalyticsHelper.playAudioStream(context, url);
             ViewUtils.playAudioStream(context, url);
             return;
         }
         // downloaded - play local file
+        AnalyticsHelper.playLocalAudio(context, url);
         Uri uri = DowDownloadManager.getDownloadUri(url);
         ViewUtils.playLocalAudio(context, context.getString(R.string.choose_player), uri);
     }

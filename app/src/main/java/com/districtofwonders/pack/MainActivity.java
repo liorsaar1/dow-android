@@ -31,6 +31,7 @@ import com.districtofwonders.pack.fragment.NotificationsFragment;
 import com.districtofwonders.pack.fragment.PatreonFragment;
 import com.districtofwonders.pack.fragment.feed.FeedsFragment;
 import com.districtofwonders.pack.fragment.news.NewsletterListFragment;
+import com.districtofwonders.pack.gcm.AnalyticsHelper;
 import com.districtofwonders.pack.gcm.GcmHelper;
 import com.districtofwonders.pack.util.DowDownloadManager;
 import com.districtofwonders.pack.util.ViewUtils;
@@ -89,11 +90,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         } else {
             hideDrawer();
         }
-        if (savedInstanceState == null) {
-            mSelectedId = getNavSelection(this);
-        } else {
-            mSelectedId = savedInstanceState.getInt(SELECTED_ITEM_ID);
-        }
+        mSelectedId = getSelectedId(savedInstanceState);
         navigate(mSelectedId);
 
         // gcm notifications handler
@@ -104,6 +101,20 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         if (from != null) {
             handleNotification(getIntent());
         }
+    }
+
+    private int getSelectedId(Bundle savedInstanceState) {
+        // get the id from the saved instance or prefs
+        if (savedInstanceState == null) {
+            mSelectedId = getNavSelection(this);
+        } else {
+            mSelectedId = savedInstanceState.getInt(SELECTED_ITEM_ID);
+        }
+        // in case of app upgrade, the saved id might be stale
+        if (!fragmentMap.containsKey(mSelectedId)) {
+            mSelectedId = R.id.drawer_nav_feed;
+        }
+        return mSelectedId;
     }
 
     @Override
@@ -166,9 +177,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         fragmentMap.put(R.id.drawer_nav_about, AboutFragment.class.getName());
         fragmentMap.put(R.id.drawer_nav_notifications, NotificationsFragment.class.getName());
         fragmentMap.put(R.id.drawer_nav_patreon, PatreonFragment.class.getName());
-        //fragmentMap.put(R.id.drawer_nav_help, AboutFragment.class.getName());
-        //fragmentMap.put(R.id.drawer_nav_shop, AboutFragment.class.getName());
-        //fragmentMap.put(R.id.drawer_nav_sofanaut, AboutFragment.class.getName());
         fragmentMap.put(R.id.drawer_nav_newsletter, NewsletterListFragment.class.getName());
     }
 
@@ -214,6 +222,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     private void navigate(int selectedId) {
+        AnalyticsHelper.navigate( this, fragmentMap.get(selectedId));
         mDrawerLayout.closeDrawer(GravityCompat.START);
         setFragment(selectedId);
     }
@@ -270,6 +279,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     private void handleNotification(Intent intent) {
         String from = intent.getStringExtra(GcmHelper.NOTIFICATION_FROM);
+        // analytics
+        AnalyticsHelper.notificationClicked(this, from);
         // global notification - used for newsletter for now
         if (from.startsWith(FeedsFragment.FEED_TOPICS_GLOBAL)) {
             setFragment(R.id.drawer_nav_newsletter);

@@ -10,6 +10,7 @@ import android.widget.TextView;
 
 import com.districtofwonders.pack.BuildConfig;
 import com.districtofwonders.pack.R;
+import com.districtofwonders.pack.gcm.AnalyticsHelper;
 import com.districtofwonders.pack.util.ViewUtils;
 
 public class AboutFragment extends Fragment {
@@ -28,24 +29,28 @@ public class AboutFragment extends Fragment {
         root.findViewById(R.id.aboutSSS).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                AnalyticsHelper.about( getActivity(), "StarShipSofa");
                 ViewUtils.openBrowser(getActivity(), "http://www.starshipsofa.com/staff/");
             }
         });
         root.findViewById(R.id.aboutTTT).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                AnalyticsHelper.about( getActivity(), "Tales To Terrify");
                 ViewUtils.openBrowser(getActivity(), "http://talestoterrify.com/staff/");
             }
         });
         root.findViewById(R.id.aboutFFF).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                AnalyticsHelper.about( getActivity(), "Far Fetched Fables");
                 ViewUtils.openBrowser(getActivity(), "http://farfetchedfables.com/staff/");
             }
         });
         root.findViewById(R.id.aboutCredits).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                AnalyticsHelper.about( getActivity(), "Credits");
                 ViewUtils.openBrowser(getActivity(), getActivity().getString(R.string.credits_url));
             }
         });

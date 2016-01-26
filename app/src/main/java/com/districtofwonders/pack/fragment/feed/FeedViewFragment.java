@@ -24,6 +24,7 @@ import com.districtofwonders.pack.BuildConfig;
 import com.districtofwonders.pack.DowSingleton;
 import com.districtofwonders.pack.MainActivity;
 import com.districtofwonders.pack.R;
+import com.districtofwonders.pack.gcm.AnalyticsHelper;
 import com.districtofwonders.pack.util.DateUtils;
 import com.districtofwonders.pack.util.DowDownloadManager;
 import com.districtofwonders.pack.util.ViewUtils;
@@ -64,6 +65,8 @@ public class FeedViewFragment extends Fragment {
     private FeedRecyclerAdapter.OnClickListener mFeedItemOnClickListener = new FeedRecyclerAdapter.OnClickListener() {
         @Override
         public void onClickLink(int position) {
+            String url = mList.get(position).get(FeedParser.Keys.ENCLOSURE_URL);
+            AnalyticsHelper.showNotes(getActivity(), url);
             MainActivity.setChildFragment(getActivity(), EpisodeFragment.newInstance(mPageNumber, mList.get(position)));
         }
 

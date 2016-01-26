@@ -59,7 +59,7 @@
             <Switch
                 android:id="@+id/notificationsGlobal"
                 style="@style/notificationSwitch"
-                android:text="DOW news"/>
+                android:text="DoW Newsletter"/>
 
         </LinearLayout>
     </LinearLayout>
