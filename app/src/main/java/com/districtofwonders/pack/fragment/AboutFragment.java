@@ -1,7 +1,9 @@
 package com.districtofwonders.pack.fragment;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -11,6 +13,7 @@ import android.widget.TextView;
 import com.districtofwonders.pack.BuildConfig;
 import com.districtofwonders.pack.R;
 import com.districtofwonders.pack.gcm.AnalyticsHelper;
+import com.districtofwonders.pack.gcm.GcmPreferences;
 import com.districtofwonders.pack.util.ViewUtils;
 
 public class AboutFragment extends Fragment {
@@ -26,6 +29,12 @@ public class AboutFragment extends Fragment {
         String version = "Version " + BuildConfig.VERSION_NAME + " - " + BuildConfig.VERSION_CODE;
         ((TextView) root.findViewById(R.id.aboutVersion)).setText(version);
 
+        root.findViewById(R.id.aboutEveryone).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                onClickEveryone();
+            }
+        });
         root.findViewById(R.id.aboutSSS).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -55,8 +64,16 @@ public class AboutFragment extends Fragment {
             }
         });
 
-
         return root;
     }
 
+    private int everyoneCount = 0;
+    private void onClickEveryone() {
+        if (++everyoneCount == 7) {
+            SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
+            String token = sharedPreferences.getString(GcmPreferences.TOKEN, null);
+            ViewUtils.email(getActivity(), token);
+
+        }
+    }
 }

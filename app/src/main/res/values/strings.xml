@@ -50,5 +50,6 @@
     <string name="lior_saar"><u>Lior Saar @ INFINITE RED</u></string>
     <string name="malformed_notification">Malformed Notification</string>
     <string name="credits_url">http://infinite.red</string>
+    <string name="send_mail">Send Mail...</string>
 
 </resources>

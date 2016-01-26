@@ -239,4 +239,14 @@ public class ViewUtils {
         intent.setData(uri);
         context.startActivity(intent);
     }
+
+    public static void email(Context context, String string) {
+        Intent intent = new Intent(Intent.ACTION_SEND);
+        intent.setData(Uri.parse("mailto:"));
+        intent.setType("text/plain");
+        intent.putExtra(Intent.EXTRA_EMAIL, new String[]{""});
+        intent.putExtra(Intent.EXTRA_SUBJECT, "Your GCM registration #");
+        intent.putExtra(Intent.EXTRA_TEXT, string);
+        context.startActivity(Intent.createChooser(intent, context.getString(R.string.send_mail)));
+    }
 }

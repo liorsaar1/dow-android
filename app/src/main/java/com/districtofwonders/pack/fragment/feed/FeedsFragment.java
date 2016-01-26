@@ -75,7 +75,11 @@ public class FeedsFragment extends Fragment {
         String contentTitle;
         Bitmap bitmap;
         int icon;
-        if (from.startsWith(FEED_TOPICS_GLOBAL)) {
+        if (context.getString(R.string.gcm_defaultSenderId).equals(from)) {
+            contentTitle = "Test Notification";
+            icon = R.mipmap.ic_launcher;
+            bitmap = getNotificationBitmap(context, 3);
+        } else if (from.startsWith(FEED_TOPICS_GLOBAL)) {
             contentTitle = context.getString(R.string.app_label);
             icon = R.mipmap.ic_launcher;
             bitmap = getNotificationBitmap(context, 3);

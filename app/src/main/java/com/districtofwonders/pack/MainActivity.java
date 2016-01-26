@@ -25,6 +25,7 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Toast;
 
 import com.districtofwonders.pack.fragment.AboutFragment;
 import com.districtofwonders.pack.fragment.NotificationsFragment;
@@ -279,6 +280,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     private void handleNotification(Intent intent) {
         String from = intent.getStringExtra(GcmHelper.NOTIFICATION_FROM);
+        // ignore test notifications
+        if (getString(R.string.gcm_defaultSenderId).equals(from)) {
+            Toast.makeText(this, "Test notification received", Toast.LENGTH_LONG).show();
+            return;
+        }
         // analytics
         AnalyticsHelper.notificationClicked(this, from);
         // global notification - used for newsletter for now
