@@ -18,7 +18,10 @@
       "api_key": ["$PRODUCTION_API_KEY$"],
       "services": {
         "analytics_service": {
-          "status": 1
+          "status": 2,
+          "analytics_property": {
+            "tracking_id": "$PRODUCTION_ANALYTICS_KEY$"
+          }
         },
         "cloud_messaging_service": {
           "status": 2,
