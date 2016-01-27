@@ -261,7 +261,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         Log.e(TAG, "onNewIntent: from:" + from);
         // assert
         if (from == null) {
-            ViewUtils.showError(this, "Malformed Notification");
+            ViewUtils.showError(this, getString(R.string.malformed_notification));
             return;
         }
         // 'from' exists - handle notification

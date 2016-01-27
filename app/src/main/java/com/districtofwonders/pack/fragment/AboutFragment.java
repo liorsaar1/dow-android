@@ -46,7 +46,7 @@ public class AboutFragment extends Fragment {
         root.findViewById(R.id.aboutCredits).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                ViewUtils.openBrowser(getActivity(), "https://clearsightstudio.com/");
+                ViewUtils.openBrowser(getActivity(), getActivity().getString(R.string.credits_url));
             }
         });
 

@@ -54,4 +54,11 @@ public class DateUtils {
         Calendar calendar = getPubDateCal(pubDateString);
         return new SimpleDateFormat("d MMM yyyy").format(calendar.getTime());
     }
+
+    public static String getMmDd(String pubDateString) {
+        Calendar cal = getPubDateCal(pubDateString);
+        String month = getMonthString(cal);
+        String day = getDayString(cal);
+        return month +"\n" + day;
+    }
 }

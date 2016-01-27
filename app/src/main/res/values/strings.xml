@@ -32,8 +32,7 @@
 
     <!-- links -->
     <string name="link_patreon">https://www.patreon.com/districtofwonders</string>
-    <string name="link_newsletter_real">http://districtofwonders.com/newsletter</string>
-    <string name="link_newsletter">http://districtofwonders.com/</string>
+    <string name="link_newsletter">http://districtofwonders.com/feed</string>
 
     <!-- download -->
     <string name="choose_player">Choose Player:</string>
@@ -48,6 +47,8 @@
     <string name="contacting_notification_server">Contacting Notification Server</string>
     <string name="everyone_dow">Everyone has a story in the District of Wonders, come and find yours.</string>
     <string name="staff_underline"><u>Staff</u></string>
-    <string name="lior_saar"><u>Lior Saar @ Clearsight Studio</u></string>
+    <string name="lior_saar"><u>Lior Saar @ INFINITE RED</u></string>
+    <string name="malformed_notification">Malformed Notification</string>
+    <string name="credits_url">http://infinite.red</string>
 
 </resources>
