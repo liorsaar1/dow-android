@@ -11,6 +11,7 @@ import android.widget.TextView;
 import com.districtofwonders.pack.MainActivity;
 import com.districtofwonders.pack.R;
 import com.districtofwonders.pack.fragment.feed.FeedParser;
+import com.districtofwonders.pack.gcm.AnalyticsHelper;
 import com.districtofwonders.pack.util.DateUtils;
 
 import java.util.HashMap;
@@ -46,4 +47,11 @@ public class NewsletterFragment extends Fragment {
 
         return root;
     }
+
+    @Override
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        AnalyticsHelper.screen(getActivity(), "Newsletter");
+    }
+
 }

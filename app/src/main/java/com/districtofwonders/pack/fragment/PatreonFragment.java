@@ -41,6 +41,12 @@ public class PatreonFragment extends Fragment {
         return root;
     }
 
+    @Override
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        AnalyticsHelper.screen(getActivity(), "Patreon");
+    }
+
     private class MyWebViewClient extends WebViewClient {
 
         @Override

@@ -110,9 +110,13 @@ public class EpisodeFragment extends Fragment {
 
         // update buttons state
         updateButtons(getActivity());
-        // analytics
-        AnalyticsHelper.screen(getActivity(), EpisodeFragment.class.getSimpleName());
         return root;
+    }
+
+    @Override
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        AnalyticsHelper.screen(getActivity(), "Episode");
     }
 
     /**

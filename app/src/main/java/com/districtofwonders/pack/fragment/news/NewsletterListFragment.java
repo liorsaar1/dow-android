@@ -80,6 +80,7 @@ public class NewsletterListFragment extends Fragment {
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        AnalyticsHelper.screen(getActivity(), "NewsletterList");
         String url = getActivity().getString(R.string.link_newsletter);
         load(url);
     }

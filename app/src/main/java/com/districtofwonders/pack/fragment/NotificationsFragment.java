@@ -105,6 +105,12 @@ public class NotificationsFragment extends Fragment {
         return root;
     }
 
+    @Override
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        AnalyticsHelper.screen(getActivity(), "Notifications");
+    }
+
     private void setEnabled(boolean isEnabled) {
         if (isEnabled) {
             errorContainer.setVisibility(View.GONE);

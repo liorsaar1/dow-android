@@ -73,7 +73,6 @@ public class AboutFragment extends Fragment {
             SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
             String token = sharedPreferences.getString(GcmPreferences.TOKEN, null);
             ViewUtils.email(getActivity(), token);
-
         }
     }
 }
