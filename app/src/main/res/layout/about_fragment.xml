@@ -3,19 +3,17 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="#000000">
 
-    <LinearLayout
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="#000000"
-        android:orientation="vertical"
-        android:weightSum="1">
+        android:layout_height="match_parent">
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="0dip"
-            android:layout_weight="0.8"
+            android:layout_height="match_parent"
+            android:background="#000000"
             android:orientation="vertical">
 
             <TextView
@@ -74,37 +72,33 @@
                     style="@style/AboutStaff"/>
             </LinearLayout>
 
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_horizontal"
+                android:text="App Development:"
+                android:textColor="#ffffff"
+                android:textSize="18sp"/>
+
+            <TextView
+                android:id="@+id/aboutCredits"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_horizontal"
+                android:text="@string/lior_saar"
+                android:textColor="@color/colorAccent"
+                android:textSize="20sp"/>
+
+            <TextView
+                android:id="@+id/aboutVersion"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dip"
+                android:gravity="center_horizontal"
+                android:text="Version 1.0 - 1"
+                android:textColor="#ffffff"
+                android:textSize="14sp"/>
+
         </LinearLayout>
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="0dip"
-            android:layout_weight="0.05"
-            android:gravity="center_horizontal"
-            android:text="App Development:"
-            android:textColor="#ffffff"
-            android:textSize="18sp"/>
-
-        <TextView
-            android:id="@+id/aboutCredits"
-            android:layout_width="match_parent"
-            android:layout_height="0dip"
-            android:layout_weight="0.05"
-            android:gravity="center_horizontal"
-            android:text="@string/lior_saar"
-            android:textColor="@color/colorAccent"
-            android:textSize="20sp"/>
-
-        <TextView
-            android:id="@+id/aboutVersion"
-            android:layout_width="match_parent"
-            android:layout_marginTop="10dip"
-            android:layout_height="0dip"
-            android:layout_weight="0.05"
-            android:gravity="center_horizontal"
-            android:text="Version 1.0 - 1"
-            android:textColor="#ffffff"
-            android:textSize="14sp"/>
-
-    </LinearLayout>
+    </ScrollView>
 </RelativeLayout>
