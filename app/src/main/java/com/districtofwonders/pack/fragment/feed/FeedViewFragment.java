@@ -45,6 +45,7 @@ import javax.xml.parsers.ParserConfigurationException;
 public class FeedViewFragment extends Fragment {
     private static final String TAG = MainActivity.TAG; //FeedViewFragment.class.getSimpleName();
     public static final String ARG_PAGE_NUMBER = "ARG_PAGE_NUMBER";
+    public static final String REQUEST_TAG = "FEED";
     private FeedRecyclerAdapter mFeedRecyclerAdapter;
     private SwipeRefreshLayout mSwipeRefreshLayout;
     private int mPageNumber;
@@ -128,6 +129,7 @@ public class FeedViewFragment extends Fragment {
     public void onPause() {
         Log.e(TAG, "feedview: onPause: ---");
         getActivity().unregisterReceiver(mDownloadCompleteReceiver);
+        DowSingleton.getInstance(getActivity()).cancelAll(REQUEST_TAG);
         super.onPause();
     }
 
@@ -186,6 +188,7 @@ public class FeedViewFragment extends Fragment {
                         setError(error); // network error
                     }
                 });
+        stringRequest.setTag(REQUEST_TAG); // set tag for cancel
         DowSingleton.getInstance(getActivity()).addToRequestQueue(stringRequest);
     }
 
@@ -205,7 +208,7 @@ public class FeedViewFragment extends Fragment {
     }
 
     private void setData(String xmlString) throws IOException, XmlPullParserException, ParserConfigurationException, SAXException {
-        if (BuildConfig.DEBUG)
+        if (false && BuildConfig.DEBUG)
             Log.e(TAG, xmlString.substring(300, 600));
 
         FeedParser parser = new FeedParser(xmlString);

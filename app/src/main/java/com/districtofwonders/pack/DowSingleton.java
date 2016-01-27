@@ -89,6 +89,10 @@ public class DowSingleton {
         mRequestQueue.add(req);
     }
 
+    public void cancelAll(String tag) {
+        mRequestQueue.cancelAll(tag);
+    }
+
     /**
      * Gets the default {@link Tracker} for this {@link Application}.
      *
@@ -97,4 +101,5 @@ public class DowSingleton {
     public Tracker getDefaultTracker() {
         return mTracker;
     }
+
 }

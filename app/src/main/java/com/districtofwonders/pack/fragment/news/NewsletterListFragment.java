@@ -41,6 +41,7 @@ import javax.xml.parsers.ParserConfigurationException;
 
 public class NewsletterListFragment extends Fragment {
     private static final String TAG = MainActivity.TAG;
+    private static final String REQUEST_TAG = "NEWSLETTER";
     private RecyclerView mRecyclerView;
     private SwipeRefreshLayout mSwipeRefreshLayout;
     private TextView mError;
@@ -83,6 +84,12 @@ public class NewsletterListFragment extends Fragment {
         AnalyticsHelper.screen(getActivity(), "NewsletterList");
         String url = getActivity().getString(R.string.link_newsletter);
         load(url);
+    }
+
+    @Override
+    public void onPause() {
+        DowSingleton.getInstance(getActivity()).cancelAll(REQUEST_TAG);
+        super.onPause();
     }
 
     private void load(String url) {
@@ -130,6 +137,7 @@ public class NewsletterListFragment extends Fragment {
                         setError(error); // network error
                     }
                 });
+        stringRequest.setTag(REQUEST_TAG); // set tag for cancel
         DowSingleton.getInstance(getActivity()).addToRequestQueue(stringRequest);
     }
 
@@ -149,7 +157,7 @@ public class NewsletterListFragment extends Fragment {
     }
 
     private void setData(String xmlString) throws IOException, ParserConfigurationException, SAXException {
-        if (BuildConfig.DEBUG)
+        if (false && BuildConfig.DEBUG)
             Log.e(TAG, xmlString.substring(300, 600));
 
         FeedParser parser = new FeedParser(xmlString);
