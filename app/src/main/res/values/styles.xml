@@ -37,8 +37,12 @@
     <style name="ListContentError">
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">wrap_content</item>
-        <item name="android:layout_centerInParent">true</item>
-        <item name="android:textSize">36sp</item>
+        <item name="android:textSize">32sp</item>
+    </style>
+    <style name="ListContentPull">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textSize">20sp</item>
     </style>
 
     <style name="AboutStaff">

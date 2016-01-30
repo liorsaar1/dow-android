@@ -45,12 +45,11 @@ import javax.xml.parsers.ParserConfigurationException;
 public class FeedViewFragment extends Fragment {
     private static final String TAG = MainActivity.TAG; //FeedViewFragment.class.getSimpleName();
     public static final String ARG_PAGE_NUMBER = "ARG_PAGE_NUMBER";
-    public static final String REQUEST_TAG = "FEED";
     private FeedRecyclerAdapter mFeedRecyclerAdapter;
     private SwipeRefreshLayout mSwipeRefreshLayout;
     private int mPageNumber;
     private List<Map<String, String>> mList = new ArrayList<>();
-    private TextView mError;
+    private View mServerError;
 
     /**
      * when a download is completed - update the play/download buttons state
@@ -100,7 +99,7 @@ public class FeedViewFragment extends Fragment {
         mPageNumber = arguments.getInt(ARG_PAGE_NUMBER);
         // ui
         View root = inflater.inflate(R.layout.feed_view_fragment, container, false);
-        mError = (TextView) root.findViewById(R.id.feed_view_error);
+        mServerError = root.findViewById(R.id.listServerError);
 
         mSwipeRefreshLayout = (SwipeRefreshLayout)root.findViewById(R.id.feed_view_swipe);
         mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
@@ -129,7 +128,6 @@ public class FeedViewFragment extends Fragment {
     public void onPause() {
         Log.e(TAG, "feedview: onPause: ---");
         getActivity().unregisterReceiver(mDownloadCompleteReceiver);
-        DowSingleton.getInstance(getActivity()).cancelAll(REQUEST_TAG);
         super.onPause();
     }
 
@@ -141,7 +139,7 @@ public class FeedViewFragment extends Fragment {
     }
 
     private void load() {
-        mError.setVisibility(View.GONE);
+        mServerError.setVisibility(View.GONE);
         if (mList.size() != 0) {
             mFeedRecyclerAdapter.setData(mList);
             return;
@@ -188,23 +186,21 @@ public class FeedViewFragment extends Fragment {
                         setError(error); // network error
                     }
                 });
-        stringRequest.setTag(REQUEST_TAG); // set tag for cancel
         DowSingleton.getInstance(getActivity()).addToRequestQueue(stringRequest);
     }
 
     private void setError(VolleyError volleyError) {
+        if (getActivity() == null) {
+            AnalyticsHelper.error(getActivity(), "FeedView");
+            return;
+        }
         String statusCode = (volleyError.networkResponse != null) ? ""+volleyError.networkResponse.statusCode : "";
         String message = getActivity().getString(R.string.server_error) + " " + statusCode;
         setError(message);
     }
 
     private void setError(String message) {
-        // in production - do not show detailed error
-        if (!BuildConfig.DEBUG) {
-            message = getActivity().getString(R.string.server_error);
-        }
-        mError.setVisibility(View.VISIBLE);
-        mError.setText(message);
+        mServerError.setVisibility(View.VISIBLE);
     }
 
     private void setData(String xmlString) throws IOException, XmlPullParserException, ParserConfigurationException, SAXException {

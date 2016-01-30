@@ -30,7 +30,8 @@
                 android:id="@+id/aboutSSS"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical">
+                android:orientation="vertical"
+                android:paddingBottom="4dip">
 
                 <ImageView
                     android:layout_width="match_parent"
@@ -42,12 +43,13 @@
             </LinearLayout>
 
             <LinearLayout
+                android:id="@+id/aboutFFF"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical">
+                android:orientation="vertical"
+                android:paddingBottom="4dip">
 
                 <ImageView
-                    android:id="@+id/aboutFFF"
                     android:layout_width="match_parent"
                     android:layout_height="60dip"
                     android:src="@drawable/fff_logo"/>
@@ -58,12 +60,13 @@
 
 
             <LinearLayout
+                android:id="@+id/aboutTTT"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical">
+                android:orientation="vertical"
+                android:paddingBottom="4dip">
 
                 <ImageView
-                    android:id="@+id/aboutTTT"
                     android:layout_width="match_parent"
                     android:layout_height="70dip"
                     android:src="@drawable/ttt_logo"/>

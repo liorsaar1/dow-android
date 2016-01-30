@@ -41,10 +41,9 @@ import javax.xml.parsers.ParserConfigurationException;
 
 public class NewsletterListFragment extends Fragment {
     private static final String TAG = MainActivity.TAG;
-    private static final String REQUEST_TAG = "NEWSLETTER";
     private RecyclerView mRecyclerView;
     private SwipeRefreshLayout mSwipeRefreshLayout;
-    private TextView mError;
+    private View mServerError;
     private List<Map<String, String>> mList = new ArrayList<>();
     private NewsletterRecyclerAdapter mNewsletterRecyclerAdapter;
 
@@ -59,7 +58,7 @@ public class NewsletterListFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.newsletter_list_fragment, container, false);
-        mError = (TextView) view.findViewById(R.id.newsletterError);
+        mServerError = view.findViewById(R.id.listServerError);
         mSwipeRefreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.newsletterSwipe);
         mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
@@ -86,14 +85,8 @@ public class NewsletterListFragment extends Fragment {
         load(url);
     }
 
-    @Override
-    public void onPause() {
-        DowSingleton.getInstance(getActivity()).cancelAll(REQUEST_TAG);
-        super.onPause();
-    }
-
     private void load(String url) {
-        mError.setVisibility(View.GONE);
+        mServerError.setVisibility(View.GONE);
         if (mList.size() != 0) {
             mNewsletterRecyclerAdapter.setData(mList);
             return;
@@ -137,7 +130,6 @@ public class NewsletterListFragment extends Fragment {
                         setError(error); // network error
                     }
                 });
-        stringRequest.setTag(REQUEST_TAG); // set tag for cancel
         DowSingleton.getInstance(getActivity()).addToRequestQueue(stringRequest);
     }
 
@@ -148,12 +140,7 @@ public class NewsletterListFragment extends Fragment {
     }
 
     private void setError(String message) {
-        // in production - do not show detailed error
-        if (!BuildConfig.DEBUG) {
-            message = getActivity().getString(R.string.server_error);
-        }
-        mError.setVisibility(View.VISIBLE);
-        mError.setText(message);
+        mServerError.setVisibility(View.VISIBLE);
     }
 
     private void setData(String xmlString) throws IOException, ParserConfigurationException, SAXException {
